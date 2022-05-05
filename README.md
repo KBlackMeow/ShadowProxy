@@ -3,4 +3,4 @@
 # How to start 
 > Run "go build" and you will get 'shadowproxy'
 
-> When first run ./shadowproxy, it will generate a yaml config file named 'config.yaml', and then the SP will read those configs to program.
+> When first run ./shadowproxy, it will generate a yaml config file named 'config.yaml', then the SP will read those configs to program.
