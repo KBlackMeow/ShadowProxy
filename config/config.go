@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-//Config 为系统全局配置
+
 type Config struct {
 	BindAddr      string `yaml:"bindaddr"`
 	BackendAddr   string `yaml:"backendaddr"`
