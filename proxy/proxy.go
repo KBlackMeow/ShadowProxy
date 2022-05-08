@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"flag"
 	"net"
 	"sync"
 	"time"
@@ -19,6 +20,9 @@ var ShadowAddr = ""
 var links = map[string]*UDPlink{}
 var AddrToConn = map[string]net.Conn{}
 var WG sync.WaitGroup
+var ProxyProtocol = "tcp"
+var ProxyBindAddr = "0.0.0.0:30000"
+var ProxyBackendAddr = "127.0.0.1:30000"
 
 func CleanTimeoutConn() {
 
@@ -56,4 +60,26 @@ func TimeoutCloseConn(addr string, dely uint64) {
 
 func init() {
 	go CleanTimeoutConn()
+}
+
+func RunProxy() {
+	if ProxyProtocol == "tcp" {
+		WG.Add(1)
+		go RunTPortProxy(ProxyBindAddr, ProxyBackendAddr)
+
+	} else if ProxyProtocol == "udp" {
+		WG.Add(1)
+		go RunUPortProxy(ProxyBindAddr, ProxyBackendAddr)
+
+	} else if ProxyProtocol == "tcp/udp" {
+		WG.Add(2)
+		go RunTPortProxy(ProxyBindAddr, ProxyBackendAddr)
+		go RunUPortProxy(ProxyBindAddr, ProxyBackendAddr)
+
+	} else {
+		flag.Usage()
+		return
+	}
+
+	WG.Wait()
 }

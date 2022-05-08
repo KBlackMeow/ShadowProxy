@@ -3,14 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"strconv"
 
 	"shadowproxy/config"
-	"shadowproxy/fillter"
-	"shadowproxy/logger"
 	"shadowproxy/proxy"
 	"shadowproxy/service"
-	"shadowproxy/shadowtools"
 )
 
 func init() {
@@ -49,36 +45,7 @@ func main() {
 		config.ShadowProxyConfig.EnableFillter = *enableFillter
 	}
 
-	fillter.EnableFillter = config.ShadowProxyConfig.EnableFillter
+	config.InitComponentConfig()
+	proxy.RunProxy()
 
-	num, err := strconv.ParseInt(config.ShadowProxyConfig.LogLevel, 10, 32)
-	if err == nil {
-		if int(num) == 0 || int(num) == 1 || int(num) == 2 {
-			logger.LogLevel = int(num)
-		} else {
-			logger.Error("LogLevel mast be 0, 1 or 2")
-		}
-	}
-
-	shadowtools.SetShadowService(config.ShadowProxyConfig.Shadow)
-
-	if config.ShadowProxyConfig.Protocol == "tcp" {
-		proxy.WG.Add(1)
-		go proxy.RunTPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
-
-	} else if config.ShadowProxyConfig.Protocol == "udp" {
-		proxy.WG.Add(1)
-		go proxy.RunUPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
-
-	} else if config.ShadowProxyConfig.Protocol == "tcp/udp" {
-		proxy.WG.Add(2)
-		go proxy.RunTPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
-		go proxy.RunUPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
-
-	} else {
-		flag.Usage()
-		return
-	}
-
-	proxy.WG.Wait()
 }
