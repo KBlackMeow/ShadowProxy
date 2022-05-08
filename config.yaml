@@ -6,4 +6,4 @@ shadow: auth
 loglevel: "0"
 password: bee845de85ced092a39495b0e93174ad
 enablefillter: true
-consoleoutput: false
+consoleoutput: true
