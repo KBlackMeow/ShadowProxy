@@ -1,7 +1,8 @@
 bindaddr: 0.0.0.0:30000
 backendaddr: 127.0.0.1:40000
 protocol: tcp/udp
-shadow: auth
+# shadow: auth
+shadow: 127.0.0.1:50000
 loglevel: "0"
 password: bee845de85ced092a39495b0e93174ad
 enablefillter: true

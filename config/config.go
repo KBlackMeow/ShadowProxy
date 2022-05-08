@@ -8,7 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-
 type Config struct {
 	BindAddr      string `yaml:"bindaddr"`
 	BackendAddr   string `yaml:"backendaddr"`
@@ -47,7 +46,8 @@ func GenEmptyConfig() {
 		Shadow:        "auth",
 		LogLevel:      "0",
 		Password:      cryptotools.Md5_32("admin"),
-		EnableFillter: true}
+		EnableFillter: true,
+	}
 	content, err := yaml.Marshal(config)
 	if err != nil {
 		logger.Error(err)
