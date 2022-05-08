@@ -20,7 +20,7 @@ type Config struct {
 	LogLevel      string `yaml:"loglevel"`
 	Password      string `yaml:"password"`
 	EnableFillter bool   `yaml:"enablefillter"`
-	ConsoleOutput bool   `yaml:consoleoutput`
+	ConsoleOutput bool   `yaml:"consoleoutput"`
 }
 
 var FilePath = "config.yaml"
