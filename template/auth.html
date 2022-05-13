@@ -9,16 +9,15 @@
                 <input type='submit' id='submit'/>
             </div>
             <div id="tab2" hidden="true">
-                <h1 id="UserAddr">123123</h1>
-                <h1 id="LoginTime">123123</h1>
+                <h1 id="UserAddr"></h1>
+                <h1 id="LoginTime"></h1>
             </div>
 
             <script>
 
-                var pubkey = '{{.}}'
+                var pubkey = "{{.PubKey}}"
 
                 var sub = document.getElementById('submit')
-
                 sub.onclick = (e)=>{
                     var encrypt=new JSEncrypt();
                     encrypt.setPublicKey(pubkey);
@@ -31,11 +30,12 @@
 
                     let msg = password+"#"+time
                     let cmsg = encrypt.encrypt(msg)
-
+                    let token = "{{.Token}}"
                     $.ajax({
                         type: "POST",
                         url: "/verify",
                         data: JSON.stringify({'cmsg':cmsg}),
+                        headers:{"token":token},
                         success: (e)=>{
                             console.log(e)
                             if(e.UserAddr!=""){

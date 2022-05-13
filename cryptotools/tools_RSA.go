@@ -1,8 +1,10 @@
 package cryptotools
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -77,7 +79,6 @@ func RSA_Encrypt(plainText []byte, path string) []byte {
 	return cipherText
 }
 
-
 func RSA_Decrypt(cipherText []byte, path string) []byte {
 
 	file, err := os.Open(path)
@@ -89,7 +90,7 @@ func RSA_Decrypt(cipherText []byte, path string) []byte {
 	info, _ := file.Stat()
 	buf := make([]byte, info.Size())
 	file.Read(buf)
-	
+
 	block, _ := pem.Decode(buf)
 
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
@@ -100,6 +101,62 @@ func RSA_Decrypt(cipherText []byte, path string) []byte {
 	plainText, _ := rsa.DecryptPKCS1v15(rand.Reader, privateKey, cipherText)
 
 	return plainText
+}
+
+func RSA_DigitalSignature(msg []byte, path string) []byte {
+
+	file, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	info, _ := file.Stat()
+	buf := make([]byte, info.Size())
+	file.Read(buf)
+
+	block, _ := pem.Decode(buf)
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		panic(err)
+	}
+
+	msghash := sha256.Sum256(msg)
+	signbyt, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, msghash[:])
+
+	return signbyt
+}
+
+func RSA_DigitalSignatureVerify(msg []byte, sign []byte, path string) bool {
+
+	file, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	info, _ := file.Stat()
+	buf := make([]byte, info.Size())
+	file.Read(buf)
+
+	block, _ := pem.Decode(buf)
+
+	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		panic(err)
+	}
+
+	publicKey := publicKeyInterface.(*rsa.PublicKey)
+
+	msghash := sha256.Sum256(msg)
+	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, msghash[:], sign)
+
+	if err != nil {
+		logger.Error(err)
+		return false
+	}
+	return true
 }
 
 func GetKey(path string) string {
@@ -128,6 +185,20 @@ func DecryptRSAToString(cmsgb64 string) string {
 		logger.Error(err)
 	}
 	return string(RSA_Decrypt(cmsg, "private.pem"))
+}
+
+func DigitalSignature(msg string) string {
+	msgin := RSA_DigitalSignature([]byte(msg), "private.pem")
+	msginb64 := base64.StdEncoding.EncodeToString(msgin)
+	return msginb64
+}
+
+func DigitalSignatureVerify(msg string, sign string) bool {
+	signbyt, err := base64.StdEncoding.DecodeString(sign)
+	if err != nil {
+		logger.Error(err)
+	}
+	return RSA_DigitalSignatureVerify([]byte(msg), signbyt, "public.pem")
 }
 
 func init() {

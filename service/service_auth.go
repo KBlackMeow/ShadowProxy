@@ -28,11 +28,28 @@ type UserInfo struct {
 	UserLoginTime string
 }
 
+func (service AuthService) token(remoteAddr string) string {
+
+	remoteAddr, ok := proxy.LAddrToRAddr[remoteAddr]
+
+	if ok {
+		return cryptotools.DigitalSignature(remoteAddr)
+	}
+	return ""
+}
+
+func (service Service) verifyToken(remoteAddr, token string) bool {
+
+	return cryptotools.DigitalSignatureVerify(remoteAddr, token)
+
+}
+
 func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
 	remoteAddr, ok := proxy.LAddrToRAddr[r.RemoteAddr]
+	token := r.Header.Get("token")
 
-	if ok {
+	if ok && service.verifyToken(remoteAddr, token) {
 
 		var loginfo LoginInfo
 		decoder := json.NewDecoder(r.Body)
@@ -95,7 +112,13 @@ func (service AuthService) auth(w http.ResponseWriter, r *http.Request) {
 		logger.Error(err)
 		return
 	}
-	temp.Execute(w, cryptotools.GetKey("public.pem"))
+
+	type TempleInfo struct {
+		PubKey string
+		Token  string
+	}
+	x := TempleInfo{PubKey: cryptotools.GetKey("public.pem"), Token: service.token(r.RemoteAddr)}
+	temp.Execute(w, x)
 
 }
 
