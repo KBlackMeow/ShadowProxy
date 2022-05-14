@@ -70,12 +70,12 @@ func RunUPortProxy(listenAddr, backendAddr string) {
 	}
 }
 
-func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte, n int, backendAddr string, links map[string]*UDPlink) {
+func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte, n int, backendAddr string, links map[string]*UDPLink) {
 
 	logger.Log("UDP", addr.String(), "Alice connected.")
 
 	backend, err := net.Dial("udp", backendAddr)
-	link := new(UDPlink)
+	link := new(UDPLink)
 
 	if err != nil {
 		logger.Error("UDP", err)

@@ -1,8 +1,9 @@
 package fillter
 
 import (
+	"net"
 	"shadowproxy/logger"
-	"strings"
+	"sync"
 )
 
 var EnableFillter bool = true
@@ -14,9 +15,7 @@ type IPStatue struct {
 
 func Fillter(addr string) bool {
 
-	if tem := strings.Split(addr, ":"); len(tem) == 2 {
-		addr = tem[0]
-	}
+	addr = net.ParseIP(addr).String()
 
 	var ret = false
 	ret = ret || WhiteListFillter(addr)
@@ -26,11 +25,14 @@ func Fillter(addr string) bool {
 }
 
 var IPStatuList = map[string]*IPStatue{}
+var Mutex = new(sync.Mutex)
 
 func AppendWhiteList(addr string) {
-	if tem := strings.Split(addr, ":"); len(tem) == 2 {
-		addr = tem[0]
-	}
+
+	addr = net.ParseIP(addr).String()
+
+	Mutex.Lock()
+	defer Mutex.Unlock()
 
 	IP, ok := IPStatuList[addr]
 	if ok {
@@ -43,6 +45,9 @@ func AppendWhiteList(addr string) {
 
 func WhiteListFillter(addr string) bool {
 
+	Mutex.Lock()
+	defer Mutex.Unlock()
+
 	IP, ok := IPStatuList[addr]
 	if ok {
 		if IP.Statu%2 == 1 {
@@ -53,9 +58,11 @@ func WhiteListFillter(addr string) bool {
 }
 
 func AppendBlackList(addr string) {
-	if tem := strings.Split(addr, ":"); len(tem) == 2 {
-		addr = tem[0]
-	}
+
+	addr = net.ParseIP(addr).String()
+
+	Mutex.Lock()
+	defer Mutex.Unlock()
 
 	logger.Warn("Black list", addr, "appended")
 
@@ -69,6 +76,9 @@ func AppendBlackList(addr string) {
 }
 
 func BlackListFillter(addr string) bool {
+
+	Mutex.Lock()
+	defer Mutex.Unlock()
 
 	IP, ok := IPStatuList[addr]
 	if ok {

@@ -1,12 +1,14 @@
 package ids
 
 import (
+	"net"
 	"shadowproxy/fillter"
-	"strings"
+	"sync"
 	"time"
 )
 
 var GuestMap = map[string]*Guest{}
+var Mutex = new(sync.Mutex)
 
 type Guest struct {
 	GuestIP              string
@@ -48,9 +50,11 @@ func (guest Guest) PackageCheck() {
 }
 
 func CheckAddr(addr string) {
-	if tem := strings.Split(addr, ":"); len(tem) == 2 {
-		addr = tem[0]
-	}
+
+	addr = net.ParseIP(addr).String()
+
+	Mutex.Lock()
+	defer Mutex.Unlock()
 
 	guest, ok := GuestMap[addr]
 	if !ok {
@@ -68,9 +72,10 @@ func CheckAddr(addr string) {
 
 func PackageLengthRecorder(addr string, length int) {
 
-	if tem := strings.Split(addr, ":"); len(tem) == 2 {
-		addr = tem[0]
-	}
+	Mutex.Lock()
+	defer Mutex.Unlock()
+
+	addr = net.ParseIP(addr).String()
 
 	guest, ok := GuestMap[addr]
 	if !ok {
@@ -78,8 +83,6 @@ func PackageLengthRecorder(addr string, length int) {
 	}
 
 	guest.sent(length)
-
-	// logger.Log(addr, length, len(guest.PackageLengthRecoder))
 
 	if tem := len(guest.PackageLengthRecoder); tem > 100 {
 		guest.PackageLengthRecoder = guest.PackageLengthRecoder[tem-100:]
