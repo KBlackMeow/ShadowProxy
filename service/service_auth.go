@@ -20,7 +20,7 @@ type AuthService struct {
 }
 
 type LoginInfo struct {
-	Cmsg string `json:"cmsg"`
+	CMsg string `json:"cmsg"`
 }
 
 type UserInfo struct {
@@ -65,7 +65,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		cmsg := loginfo.Cmsg
+		cmsg := loginfo.CMsg
 		msg := cryptotools.DecryptRSAToString(cmsg)
 		msgs := strings.Split(msg, "#")
 
