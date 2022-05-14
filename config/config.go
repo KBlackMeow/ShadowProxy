@@ -30,10 +30,8 @@ func GetConfig() {
 	config := Config{}
 	content, err := ioutil.ReadFile(FilePath)
 	if err != nil {
-
 		GenEmptyConfig()
-		// GetConfig()
-		panic(nil)
+		return
 	}
 	err = yaml.Unmarshal(content, &config)
 	if err != nil {
@@ -43,7 +41,7 @@ func GetConfig() {
 }
 
 func GenEmptyConfig() {
-	config := Config{
+	ShadowProxyConfig = Config{
 		BindAddr:      "0.0.0.0:30000",
 		BackendAddr:   "127.0.0.1:40000",
 		Protocol:      "tcp/udp",
@@ -53,7 +51,7 @@ func GenEmptyConfig() {
 		EnableFillter: true,
 		ConsoleOutput: true,
 	}
-	content, err := yaml.Marshal(config)
+	content, err := yaml.Marshal(ShadowProxyConfig)
 	if err != nil {
 		panic(err)
 	}
