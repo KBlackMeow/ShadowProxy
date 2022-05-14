@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"net/http"
+	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
 )
 
@@ -11,7 +12,7 @@ type FlagService struct {
 }
 
 func (service FlagService) flag(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "This is flag{W_W $_$}")
+	fmt.Fprintf(w, "Flag{"+cryptotools.Hash_MD5("flag")+"}")
 }
 
 func (service FlagService) Run() {
