@@ -7,6 +7,11 @@ import (
 
 var EnableFillter bool = true
 
+type IPStatue struct {
+	IP    string
+	Statu byte
+}
+
 func Fillter(addr string) bool {
 
 	if tem := strings.Split(addr, ":"); len(tem) == 2 {
@@ -20,41 +25,57 @@ func Fillter(addr string) bool {
 	return ret
 }
 
-var WhiteList = []string{}
+var IPStatuList = map[string]*IPStatue{}
 
 func AppendWhiteList(addr string) {
 	if tem := strings.Split(addr, ":"); len(tem) == 2 {
 		addr = tem[0]
 	}
-	WhiteList = append(WhiteList, addr)
+
+	IP, ok := IPStatuList[addr]
+	if ok {
+		IP.Statu |= 1
+		return
+	}
+
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1}
 }
 
 func WhiteListFillter(addr string) bool {
 
-	for _, name := range WhiteList {
-		if addr == name {
+	IP, ok := IPStatuList[addr]
+	if ok {
+		if IP.Statu%2 == 1 {
 			return false
 		}
 	}
 	return true
 }
 
-var BlackList = []string{}
-
 func AppendBlackList(addr string) {
 	if tem := strings.Split(addr, ":"); len(tem) == 2 {
 		addr = tem[0]
 	}
-	BlackList = append(BlackList, addr)
+
 	logger.Warn("Black list", addr, "appended")
+
+	IP, ok := IPStatuList[addr]
+	if ok {
+		IP.Statu |= 2
+		return
+	}
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 2}
+
 }
 
 func BlackListFillter(addr string) bool {
 
-	for _, name := range BlackList {
-		if addr == name {
+	IP, ok := IPStatuList[addr]
+	if ok {
+		if (IP.Statu%4)/2 == 1 {
 			return true
 		}
 	}
+
 	return false
 }

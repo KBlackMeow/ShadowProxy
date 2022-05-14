@@ -61,7 +61,7 @@ func CheckAddr(addr string) {
 
 	guest.visited()
 
-	if guest.count() > 5 {
+	if guest.count() >= 5 {
 		fillter.AppendBlackList(addr)
 	}
 }
