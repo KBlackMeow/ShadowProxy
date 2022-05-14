@@ -32,8 +32,12 @@ func (service AuthService) token(remoteAddr string) string {
 
 	remoteAddr, ok := proxy.LAddrToRAddr[remoteAddr]
 
+	// if ok {
+	// 	return cryptotools.DigitalSignature(remoteAddr)
+	// }
+	// return ""
 	if ok {
-		return cryptotools.DigitalSignature(remoteAddr)
+		return cryptotools.Hash_SHA512(remoteAddr)
 	}
 	return ""
 }
@@ -47,9 +51,8 @@ func (service Service) verifyToken(remoteAddr, token string) bool {
 func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
 	remoteAddr, ok := proxy.LAddrToRAddr[r.RemoteAddr]
-	token := r.Header.Get("token")
 
-	if ok && service.verifyToken(remoteAddr, token) {
+	if ok {
 
 		var loginfo LoginInfo
 		decoder := json.NewDecoder(r.Body)
@@ -65,19 +68,25 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 		msg := cryptotools.DecryptRSAToString(cmsg)
 		msgs := strings.Split(msg, "#")
 
-		if msg == "" || len(msgs) != 2 {
-			logger.Log("Auth", remoteAddr, "RSA Public Key is wrong")
+		if msg == "" || len(msgs) != 3 {
+			logger.Warn("Auth", remoteAddr, "RSA Public Key is wrong")
 			time.Sleep(time.Duration(3000) * time.Millisecond)
 			return
 		}
 
-		password := cryptotools.Md5_32(msgs[0])
+		password := cryptotools.Hash_SHA512(msgs[0])
 		msgUnixTime, _ := strconv.ParseInt(msgs[1], 10, 64)
 		msgUnixTime = int64(msgUnixTime)
 
-		// logger.Log(time.Now().UnixMilli(), int64(MsgUnixTime), (time.Now().UnixMilli() - int64(MsgUnixTime)), password, cryptotools.Md5_32(config.ShadowProxyConfig.Password))
+		token := msgs[2]
 
-		if (time.Now().UnixMilli()-msgUnixTime) > 0 && (time.Now().UnixMilli()-msgUnixTime) < 1000 && password == cryptotools.Md5_32(config.ShadowProxyConfig.Password) {
+		if token == cryptotools.Hash_SHA512(remoteAddr) {
+			logger.Warn("Auth", remoteAddr, "Token is wrong")
+			time.Sleep(time.Duration(3000) * time.Millisecond)
+			return
+		}
+
+		if (time.Now().UnixMilli()-msgUnixTime) > 0 && (time.Now().UnixMilli()-msgUnixTime) < 1000 && password == cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
 
 			fillter.AppendWhiteList(remoteAddr)
 
@@ -89,7 +98,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if password != cryptotools.Md5_32(config.ShadowProxyConfig.Password) {
+		if password != cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
 			logger.Warn("Auth", remoteAddr, "Password is wrong")
 		} else if (time.Now().UnixMilli() - msgUnixTime) > 1000 {
 			logger.Warn("Auth", remoteAddr, "Unix Time exceed the time limit")

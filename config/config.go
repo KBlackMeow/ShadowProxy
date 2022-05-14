@@ -32,8 +32,8 @@ func GetConfig() {
 	if err != nil {
 
 		GenEmptyConfig()
-		GetConfig()
-		panic(err)
+		// GetConfig()
+		panic(nil)
 	}
 	err = yaml.Unmarshal(content, &config)
 	if err != nil {
@@ -49,7 +49,7 @@ func GenEmptyConfig() {
 		Protocol:      "tcp/udp",
 		Shadow:        "auth",
 		LogLevel:      "0",
-		Password:      cryptotools.Md5_32("admin"),
+		Password:      cryptotools.Hash_MD5("admin"),
 		EnableFillter: true,
 		ConsoleOutput: true,
 	}

@@ -4,7 +4,7 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
+	"crypto/sha512"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -122,8 +122,8 @@ func RSA_DigitalSignature(msg []byte, path string) []byte {
 		panic(err)
 	}
 
-	msghash := sha256.Sum256(msg)
-	signbyt, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, msghash[:])
+	msghash := sha512.Sum512(msg)
+	signbyt, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA512, msghash[:])
 
 	return signbyt
 }
@@ -149,8 +149,8 @@ func RSA_DigitalSignatureVerify(msg []byte, sign []byte, path string) bool {
 
 	publicKey := publicKeyInterface.(*rsa.PublicKey)
 
-	msghash := sha256.Sum256(msg)
-	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, msghash[:], sign)
+	msghash := sha512.Sum512(msg)
+	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA512, msghash[:], sign)
 
 	if err != nil {
 		logger.Error(err)

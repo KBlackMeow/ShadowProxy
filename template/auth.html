@@ -27,17 +27,17 @@
 
                     var time = String(Date.now())
                     // let time = encrypt.encrypt(time)
-
-                    let msg = password+"#"+time
-                    let cmsg = encrypt.encrypt(msg)
                     let token = "{{.Token}}"
+
+                    let msg = password+"#"+time+"#"+token
+                    let cmsg = encrypt.encrypt(msg)
+
                     $.ajax({
                         type: "POST",
                         url: "/verify",
                         data: JSON.stringify({'cmsg':cmsg}),
-                        headers:{"token":token},
                         success: (e)=>{
-                            console.log(e)
+                            // console.log(e)
                             if(e.UserAddr!=""){
                                 document.getElementById("UserAddr").innerText = e.UserAddr
                                 document.getElementById("LoginTime").innerText = e.UserLoginTime
