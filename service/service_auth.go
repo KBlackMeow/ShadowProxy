@@ -42,10 +42,11 @@ func (service AuthService) token(remoteAddr string) string {
 	return ""
 }
 
-func (service Service) verifyToken(remoteAddr, token string) bool {
-
-	return cryptotools.DigitalSignatureVerify(remoteAddr, token)
-
+func (service Service) verifyToken(remoteAddr string, token string) bool {
+	if token == cryptotools.Hash_SHA512(remoteAddr) {
+		return true
+	}
+	return false
 }
 
 func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
@@ -79,8 +80,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 		msgUnixTime = int64(msgUnixTime)
 
 		token := msgs[2]
-
-		if token == cryptotools.Hash_SHA512(remoteAddr) {
+		if !service.verifyToken(remoteAddr, token) {
 			logger.Warn("Auth", remoteAddr, "Token is wrong")
 			time.Sleep(time.Duration(3000) * time.Millisecond)
 			return
