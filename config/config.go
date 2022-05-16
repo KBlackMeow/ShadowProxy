@@ -16,6 +16,7 @@ type Config struct {
 	Password      string `yaml:"password"`
 	EnableFillter bool   `yaml:"enablefillter"`
 	ConsoleOutput bool   `yaml:"consoleoutput"`
+	Debug         bool   `yaml:"debug"`
 }
 
 var FilePath = "config.yaml"

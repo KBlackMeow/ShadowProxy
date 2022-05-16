@@ -155,10 +155,11 @@ func (service AuthService) GetAddr() string {
 }
 
 func init() {
-
+	if !config.ShadowProxyConfig.Debug {
+		return
+	}
 	service := AuthService{Service{serviceName: "auth", serviceAddr: "127.0.0.1:57575"}}
 	service.Contraller()
-
 	Services = append(Services, service)
 
 }

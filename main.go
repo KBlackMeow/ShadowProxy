@@ -9,6 +9,16 @@ import (
 	"shadowproxy/shadowtools"
 )
 
+func init() {
+	config.InitConfig()
+}
+
+func ComponentInit() {
+	service.InitServices()
+	shadowtools.InitShadowService()
+	proxy.RunProxy()
+}
+
 func main() {
 
 	help := flag.Bool("help", false, "print usage")
@@ -26,9 +36,10 @@ func main() {
 		config.FilePath = *cfg
 
 	}
-	config.InitConfig()
-	service.InitServices()
-	shadowtools.InitShadowService()
-	proxy.RunProxy()
+	/**
+	init
+	*/
+
+	ComponentInit()
 
 }
