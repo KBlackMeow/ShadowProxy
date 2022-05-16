@@ -10,9 +10,9 @@ import (
 
 // UDP Port Proxy
 
-func RunUPortProxy(listenAddr, backendAddr string) {
+func RunUPortProxy(bindAddr, backendAddr string) {
 
-	udpLAddr, _ := net.ResolveUDPAddr("udp", listenAddr)
+	udpLAddr, _ := net.ResolveUDPAddr("udp", bindAddr)
 	listener, err := net.ListenUDP("udp", udpLAddr)
 
 	if err != nil {
@@ -24,7 +24,7 @@ func RunUPortProxy(listenAddr, backendAddr string) {
 
 	defer listener.Close()
 
-	logger.Log("UDP", listenAddr, "udp-proxy started.")
+	logger.Log("UDP", bindAddr, "udp-proxy started.")
 
 	for {
 

@@ -8,9 +8,9 @@ import (
 )
 
 // TCP Port Proxy
-func RunTPortProxy(listenAddr string, backendAddr string) {
+func RunTPortProxy(bindAddr string, backendAddr string) {
 
-	listener, err := net.Listen("tcp4", listenAddr)
+	listener, err := net.Listen("tcp4", bindAddr)
 
 	if err != nil {
 		logger.Error("TCP", err)
@@ -20,7 +20,7 @@ func RunTPortProxy(listenAddr string, backendAddr string) {
 
 	defer listener.Close()
 
-	logger.Log("TCP", listenAddr, "tcp-proxy started.")
+	logger.Log("TCP", bindAddr, "tcp-proxy started.")
 
 	for {
 		conn, err := listener.Accept()
