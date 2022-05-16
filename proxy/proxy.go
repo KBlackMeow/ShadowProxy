@@ -27,10 +27,6 @@ var links = map[string]*UDPLink{}
 var IPToLinks = map[string]*IPLinks{}
 var WG sync.WaitGroup
 
-// var config.ShadowProxyConfig.Protocol = "tcp"
-// var config.ShadowProxyConfig.BindAddr = "0.0.0.0:30000"
-// var config.ShadowProxyConfig.BackendAddr = "127.0.0.1:30000"
-
 var Mutex = new(sync.Mutex)
 
 func AddLinkToIP(conn net.Conn, addr string) {

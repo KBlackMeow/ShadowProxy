@@ -64,7 +64,6 @@ func TConnectionHandler(conn net.Conn, backendAddr string) {
 	LAddrToRAddr[backend.LocalAddr().String()] = conn.RemoteAddr().String()
 
 	AddLinkToIP(backend, conn.RemoteAddr().String())
-	// logger.Log(LAddrToRAddr, AddrToConn)
 
 	defer backend.Close()
 
@@ -78,7 +77,7 @@ func TConnectionHandler(conn net.Conn, backendAddr string) {
 
 	delete(LAddrToRAddr, backend.LocalAddr().String())
 	delete(IPToLinks, conn.RemoteAddr().String())
-	// logger.Log(LAddrToRAddr, AddrToConn)
+
 	logger.Log("TCP", conn.RemoteAddr().String(), "Alice connection is closed.")
 }
 
