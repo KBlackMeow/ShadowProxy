@@ -2,6 +2,7 @@ package fillter
 
 import (
 	"net"
+	"shadowproxy/config"
 	"shadowproxy/logger"
 	"sync"
 )
@@ -20,7 +21,7 @@ func Fillter(addr string) bool {
 	var ret = false
 	ret = ret || WhiteListFillter(addr)
 	ret = ret || BlackListFillter(addr)
-	ret = ret && EnableFillter
+	ret = ret && config.ShadowProxyConfig.EnableFillter
 	return ret
 }
 

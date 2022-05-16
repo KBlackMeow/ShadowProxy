@@ -3,25 +3,27 @@ package logger
 import (
 	"fmt"
 	"os"
+	"shadowproxy/config"
 	"time"
 )
 
-var LogLevel int
-var ConsoleOutput bool
+// var config.ShadowProxyConfig.LogLevel int
+
+// var config.ShadowProxyConfig.ConsoleOutput bool
 
 func TimeNow() string {
 	return time.Now().Format("2006-01-02 15:04:05")
 }
 
 func Log(info ...any) {
-	if LogLevel > 0 {
+	if config.ShadowProxyConfig.LogLevel > 0 {
 		return
 	}
 	out := fmt.Sprint(TimeNow(), " [+] : ")
 	for _, s := range info {
 		out += fmt.Sprint(s, " ")
 	}
-	if ConsoleOutput {
+	if config.ShadowProxyConfig.ConsoleOutput {
 		fmt.Println(out)
 	} else {
 		WriteFileln(out)
@@ -29,14 +31,14 @@ func Log(info ...any) {
 }
 
 func Warn(info ...any) {
-	if LogLevel > 1 {
+	if config.ShadowProxyConfig.LogLevel > 1 {
 		return
 	}
 	out := fmt.Sprint(TimeNow(), " [-] : ")
 	for _, s := range info {
 		out += fmt.Sprint(s, " ")
 	}
-	if ConsoleOutput {
+	if config.ShadowProxyConfig.ConsoleOutput {
 		fmt.Println(out)
 	} else {
 		WriteFileln(out)
@@ -48,7 +50,7 @@ func Error(err ...any) {
 	for _, s := range err {
 		out += fmt.Sprint(s, " ")
 	}
-	if ConsoleOutput {
+	if config.ShadowProxyConfig.ConsoleOutput {
 		fmt.Println(out)
 	} else {
 		WriteFileln(out)

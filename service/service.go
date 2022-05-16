@@ -21,7 +21,7 @@ func ServiceAppend(work Runner) {
 	Services = append(Services, work)
 }
 
-func StartServices() {
+func InitServices() {
 	for _, service := range Services {
 		go service.Run()
 		proxy.NameToAddr[service.GetName()] = service.GetAddr()

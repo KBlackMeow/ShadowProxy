@@ -3,11 +3,6 @@ package config
 import (
 	"io/ioutil"
 	"shadowproxy/cryptotools"
-	"shadowproxy/fillter"
-	"shadowproxy/logger"
-	"shadowproxy/proxy"
-	"shadowproxy/shadowtools"
-	"strconv"
 
 	"gopkg.in/yaml.v2"
 )
@@ -17,7 +12,7 @@ type Config struct {
 	BackendAddr   string `yaml:"backendaddr"`
 	Protocol      string `yaml:"protocol"`
 	Shadow        string `yaml:"shadow"`
-	LogLevel      string `yaml:"loglevel"`
+	LogLevel      int    `yaml:"loglevel"`
 	Password      string `yaml:"password"`
 	EnableFillter bool   `yaml:"enablefillter"`
 	ConsoleOutput bool   `yaml:"consoleoutput"`
@@ -26,7 +21,7 @@ type Config struct {
 var FilePath = "config.yaml"
 var ShadowProxyConfig Config
 
-func GetConfig() {
+func InitConfig() {
 	config := Config{}
 	content, err := ioutil.ReadFile(FilePath)
 	if err != nil {
@@ -46,7 +41,7 @@ func GenEmptyConfig() {
 		BackendAddr:   "127.0.0.1:40000",
 		Protocol:      "tcp/udp",
 		Shadow:        "auth",
-		LogLevel:      "0",
+		LogLevel:      0,
 		Password:      cryptotools.Hash_MD5("admin"),
 		EnableFillter: true,
 		ConsoleOutput: true,
@@ -56,24 +51,4 @@ func GenEmptyConfig() {
 		panic(err)
 	}
 	ioutil.WriteFile(FilePath, content, 0666)
-}
-
-func InitComponentConfig() {
-	logger.ConsoleOutput = ShadowProxyConfig.ConsoleOutput
-	fillter.EnableFillter = ShadowProxyConfig.EnableFillter
-
-	shadowtools.SetShadowService(ShadowProxyConfig.Shadow)
-
-	if num, err := strconv.ParseInt(ShadowProxyConfig.LogLevel, 10, 32); err == nil {
-		if int(num) == 0 || int(num) == 1 || int(num) == 2 {
-			logger.LogLevel = int(num)
-		} else {
-			logger.Error("LogLevel mast be 0, 1 or 2")
-		}
-	}
-
-	proxy.ProxyProtocol = ShadowProxyConfig.Protocol
-	proxy.ProxyBindAddr = ShadowProxyConfig.BindAddr
-	proxy.ProxyBackendAddr = ShadowProxyConfig.BackendAddr
-
 }

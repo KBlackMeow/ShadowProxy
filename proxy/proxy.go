@@ -3,6 +3,7 @@ package proxy
 import (
 	"flag"
 	"net"
+	"shadowproxy/config"
 	"sync"
 	"time"
 )
@@ -25,9 +26,10 @@ var ShadowAddr = ""
 var links = map[string]*UDPLink{}
 var IPToLinks = map[string]*IPLinks{}
 var WG sync.WaitGroup
-var ProxyProtocol = "tcp"
-var ProxyBindAddr = "0.0.0.0:30000"
-var ProxyBackendAddr = "127.0.0.1:30000"
+
+// var config.ShadowProxyConfig.Protocol = "tcp"
+// var config.ShadowProxyConfig.BindAddr = "0.0.0.0:30000"
+// var config.ShadowProxyConfig.BackendAddr = "127.0.0.1:30000"
 
 var Mutex = new(sync.Mutex)
 
@@ -98,18 +100,18 @@ func init() {
 }
 
 func RunProxy() {
-	if ProxyProtocol == "tcp" {
+	if config.ShadowProxyConfig.Protocol == "tcp" {
 		WG.Add(1)
-		go RunTPortProxy(ProxyBindAddr, ProxyBackendAddr)
+		go RunTPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
 
-	} else if ProxyProtocol == "udp" {
+	} else if config.ShadowProxyConfig.Protocol == "udp" {
 		WG.Add(1)
-		go RunUPortProxy(ProxyBindAddr, ProxyBackendAddr)
+		go RunUPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
 
-	} else if ProxyProtocol == "tcp/udp" {
+	} else if config.ShadowProxyConfig.Protocol == "tcp/udp" {
 		WG.Add(2)
-		go RunTPortProxy(ProxyBindAddr, ProxyBackendAddr)
-		go RunUPortProxy(ProxyBindAddr, ProxyBackendAddr)
+		go RunTPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
+		go RunUPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
 
 	} else {
 		flag.Usage()

@@ -2,6 +2,7 @@ package shadowtools
 
 import (
 	"net"
+	"shadowproxy/config"
 	"shadowproxy/proxy"
 	"strconv"
 	"strings"
@@ -9,8 +10,8 @@ import (
 
 var ShadowAddr string
 
-func SetShadowService(serviceName string) {
-
+func InitShadowService() {
+	serviceName := config.ShadowProxyConfig.Shadow
 	serviceAddr, ok := proxy.NameToAddr[serviceName]
 	if ok {
 		proxy.ShadowAddr = serviceAddr

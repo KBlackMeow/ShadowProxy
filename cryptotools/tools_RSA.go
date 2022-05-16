@@ -9,7 +9,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"os"
-	"shadowproxy/logger"
 )
 
 func GenerateRSAKey(bits int) {
@@ -153,7 +152,6 @@ func RSA_DigitalSignatureVerify(msg []byte, sign []byte, path string) bool {
 	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA512, msghash[:], sign)
 
 	if err != nil {
-		logger.Error(err)
 		return false
 	}
 	return true
@@ -180,10 +178,7 @@ func EncryptRSAToString(msg string) string {
 }
 
 func DecryptRSAToString(cmsgb64 string) string {
-	cmsg, err := base64.StdEncoding.DecodeString(cmsgb64)
-	if err != nil {
-		logger.Error(err)
-	}
+	cmsg, _ := base64.StdEncoding.DecodeString(cmsgb64)
 	return string(RSA_Decrypt(cmsg, "private.pem"))
 }
 
@@ -194,11 +189,8 @@ func DigitalSignature(msg string) string {
 }
 
 func DigitalSignatureVerify(msg string, sign string) bool {
-	signbyt, err := base64.StdEncoding.DecodeString(sign)
-	if err != nil {
-		logger.Error(err)
-	}
-	return RSA_DigitalSignatureVerify([]byte(msg), signbyt, "public.pem")
+	msgin, _ := base64.StdEncoding.DecodeString(sign)
+	return RSA_DigitalSignatureVerify([]byte(msg), msgin, "public.pem")
 }
 
 func init() {
