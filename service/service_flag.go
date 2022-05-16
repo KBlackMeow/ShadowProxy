@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"net/http"
+	"shadowproxy/config"
 	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
 )
@@ -16,6 +17,10 @@ func (service FlagService) flag(w http.ResponseWriter, r *http.Request) {
 }
 
 func (service FlagService) Run() {
+	if !config.ShadowProxyConfig.Debug {
+		return
+	}
+	logger.Log("Flag Service Starting...")
 	mux := http.NewServeMux()
 	mux.HandleFunc("/flag", service.flag)
 	err := http.ListenAndServe(service.serviceAddr, mux)
@@ -33,6 +38,7 @@ func (service FlagService) GetName() string {
 }
 
 func init() {
+
 	service := FlagService{Service{serviceAddr: "127.0.0.1:40000", serviceName: "flag"}}
 	ServiceAppend(service)
 }
