@@ -5,18 +5,36 @@ import (
 	"shadowproxy/fillter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
+	"sync"
 	"time"
 )
 
 // UDP Port Proxy
-var Sender net.UDPConn
-var UDPConns = map[string]*UDPConn{}
 
 type UDPConn struct {
 	Addr       *net.UDPAddr
 	remoteConn net.Conn
 	TTL        int64
 	RecvTime   time.Time
+}
+
+var Sender net.UDPConn
+var UDPConns = map[string]*UDPConn{}
+var UDPMutex = new(sync.Mutex)
+
+func SetUDPConn(addr string, conn *UDPConn) {
+	UDPMutex.Lock()
+	defer UDPMutex.Unlock()
+	UDPConns[addr] = conn
+
+}
+
+func GetUDPConn(addr string) (*UDPConn, bool) {
+	UDPMutex.Lock()
+	defer UDPMutex.Unlock()
+	udpConn, ok := UDPConns[addr]
+	return udpConn, ok
+
 }
 
 func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
@@ -39,12 +57,10 @@ func CleanTimeoutUDPConn() {
 }
 
 func CleanAllUDPConn() {
-
 	for k, v := range UDPConns {
 		v.remoteConn.Close()
 		delete(UDPConns, k)
 	}
-
 }
 
 func RunUPortProxy(bindAddr, backendAddr string) {
@@ -76,7 +92,7 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 			return
 		}
 
-		udpConn, ok := UDPConns[addr.String()]
+		udpConn, ok := GetUDPConn(addr.String())
 
 		if !ok {
 
@@ -125,9 +141,11 @@ func UConnectionHandler(addr *net.UDPAddr, buffer []byte, n int, backendAddr str
 	udpConn.TTL = 10000
 	udpConn.RecvTime = time.Now()
 
-	UDPConns[addr.String()] = udpConn
+	// UDPConns[addr.String()] = udpConn
+	SetUDPConn(addr.String(), udpConn)
 	// LAddrToRAddr[backend.LocalAddr().String()] = addr.String()
 	SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
+
 	n2, err := backend.Write(buffer[:n])
 	if err != nil {
 		logger.Error("UDP", err)
