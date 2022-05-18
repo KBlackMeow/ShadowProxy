@@ -5,7 +5,53 @@ import (
 	"shadowproxy/fillter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
+	"sync"
+	"time"
 )
+
+type IPConns struct {
+	IP    string
+	Conns []net.Conn
+}
+
+var IPToConns = map[string]*IPConns{}
+var WG sync.WaitGroup
+
+var Mutex = new(sync.Mutex)
+
+func AddConnToIP(conn net.Conn, addr string) {
+
+	ip := net.ParseIP(addr).String()
+
+	Mutex.Lock()
+	defer Mutex.Unlock()
+
+	ipConns, ok := IPToConns[ip]
+	if ok {
+		ipConns.Conns = append(ipConns.Conns, conn)
+		return
+	}
+	IPToConns[addr] = &IPConns{IP: addr, Conns: []net.Conn{conn}}
+
+}
+
+func TimeoutCloseConn(addr string, dely uint64) {
+
+	addr = net.ParseIP(addr).String()
+
+	time.Sleep(time.Duration(dely) * time.Millisecond)
+
+	Mutex.Lock()
+	defer Mutex.Unlock()
+	ipConns, ok := IPToConns[addr]
+	if ok {
+		for _, v := range ipConns.Conns {
+			v.Close()
+		}
+		delete(IPToConns, addr)
+	}
+
+}
 
 // TCP Port Proxy
 func RunTPortProxy(bindAddr string, backendAddr string) {
