@@ -101,8 +101,8 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
 	time.Sleep(time.Duration(3000) * time.Millisecond)
 	userinfo := UserInfo{}
-	res, _ := json.Marshal(&userinfo)
-	fmt.Fprintf(w, string(res))
+	data, _ := json.Marshal(&userinfo)
+	fmt.Fprintf(w, string(data))
 }
 
 func (service AuthService) auth(w http.ResponseWriter, r *http.Request) {
