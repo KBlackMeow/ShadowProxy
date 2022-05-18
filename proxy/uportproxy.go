@@ -37,7 +37,7 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 			return
 		}
 
-		link, ok := links[addr.String()]
+		conn, ok := UDPConns[addr.String()]
 
 		if !ok {
 
@@ -48,34 +48,34 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 
 				ids.CheckAddr(addr.String())
 
-				go UConnectionHandler(addr, listener, buffer, n1, backendAddr, links)
+				go UConnectionHandler(addr, listener, buffer, n1, backendAddr, UDPConns)
 			}
 			continue
 		}
 
 		ids.PackageLengthRecorder(addr.String(), n1)
 
-		n2, err := links[addr.String()].backend.Write(buffer[:n1])
+		n2, err := UDPConns[addr.String()].backend.Write(buffer[:n1])
 
 		if err != nil {
 
 			logger.Error("UDP", err)
-			links[addr.String()].backend.Close()
-			delete(links, addr.String())
+			UDPConns[addr.String()].backend.Close()
+			delete(UDPConns, addr.String())
 			continue
 		}
 
-		logger.Log("UDP", addr.String(), "->", link.backend.RemoteAddr().String(), n2, "Bytes")
-		links[addr.String()].recvtime = time.Now()
+		logger.Log("UDP", addr.String(), "->", conn.backend.RemoteAddr().String(), n2, "Bytes")
+		UDPConns[addr.String()].recvtime = time.Now()
 	}
 }
 
-func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte, n int, backendAddr string, links map[string]*UDPLink) {
+func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte, n int, backendAddr string, conns map[string]*UDPConn) {
 
 	logger.Log("UDP", addr.String(), "Alice connected.")
 
 	backend, err := net.Dial("udp", backendAddr)
-	link := new(UDPLink)
+	link := new(UDPConn)
 
 	if err != nil {
 		logger.Error("UDP", err)
@@ -88,7 +88,7 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 	link.ttl = 10000
 	link.recvtime = time.Now()
 
-	links[addr.String()] = link
+	conns[addr.String()] = link
 
 	n2, err := backend.Write(buffer[:n])
 	if err != nil {

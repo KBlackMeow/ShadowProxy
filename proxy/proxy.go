@@ -8,51 +8,51 @@ import (
 	"time"
 )
 
-type UDPLink struct {
+type UDPConn struct {
 	addr     string
 	backend  net.Conn
 	ttl      uint64
 	recvtime time.Time
 }
 
-type IPLinks struct {
+type IPConns struct {
 	IP    string
-	links []net.Conn
+	Conns []net.Conn
 }
 
 var LAddrToRAddr = map[string]string{}
 var NameToAddr = map[string]string{}
 var ShadowAddr = ""
-var links = map[string]*UDPLink{}
-var IPToLinks = map[string]*IPLinks{}
+var UDPConns = map[string]*UDPConn{}
+var IPToConns = map[string]*IPConns{}
 var WG sync.WaitGroup
 
 var Mutex = new(sync.Mutex)
 
-func AddLinkToIP(conn net.Conn, addr string) {
+func AddConnToIP(conn net.Conn, addr string) {
 
 	addr = net.ParseIP(addr).String()
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
-	links, ok := IPToLinks[addr]
+	Conns, ok := IPToConns[addr]
 	if ok {
-		links.links = append(links.links, conn)
+		Conns.Conns = append(Conns.Conns, conn)
 		return
 	}
-	IPToLinks[addr] = &IPLinks{IP: addr, links: []net.Conn{conn}}
+	IPToConns[addr] = &IPConns{IP: addr, Conns: []net.Conn{conn}}
 
 }
 
-func CleanTimeoutConn() {
+func CleanTimeoutUDPConn() {
 
 	for {
 		Mutex.Lock()
-		for k, v := range links {
+		for k, v := range UDPConns {
 			if uint64(time.Now().Sub(v.recvtime).Nanoseconds()/1e6) > v.ttl {
 				v.backend.Close()
-				delete(links, k)
+				delete(UDPConns, k)
 			}
 		}
 		Mutex.Unlock()
@@ -61,14 +61,14 @@ func CleanTimeoutConn() {
 
 }
 
-func CleanAllConn() {
+func CleanAllUDPConn() {
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
-	for k, v := range links {
+	for k, v := range UDPConns {
 		v.backend.Close()
-		delete(links, k)
+		delete(UDPConns, k)
 	}
 
 }
@@ -81,18 +81,18 @@ func TimeoutCloseConn(addr string, dely uint64) {
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
-	ipLinks, ok := IPToLinks[addr]
+	ipConns, ok := IPToConns[addr]
 	if ok {
-		for _, v := range ipLinks.links {
+		for _, v := range ipConns.Conns {
 			v.Close()
 		}
-		delete(IPToLinks, addr)
+		delete(IPToConns, addr)
 	}
 
 }
 
 func init() {
-	go CleanTimeoutConn()
+	go CleanTimeoutUDPConn()
 }
 
 func RunProxy() {
