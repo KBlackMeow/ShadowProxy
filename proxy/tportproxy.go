@@ -100,7 +100,8 @@ func TConnectionHandler(conn net.Conn, backendAddr string) {
 		return
 	}
 
-	LAddrToRAddr[backend.LocalAddr().String()] = conn.RemoteAddr().String()
+	// LAddrToRAddr[backend.LocalAddr().String()] = conn.RemoteAddr().String()
+	SetRAddrToLAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
 	AddConnToIP(backend, conn.RemoteAddr().String())
 
 	defer backend.Close()

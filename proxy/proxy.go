@@ -2,9 +2,26 @@ package proxy
 
 import (
 	"shadowproxy/config"
+	"sync"
 )
 
+var Mutex = new(sync.Mutex)
+
 var LAddrToRAddr = map[string]string{}
+
+func GetRAddrFromLAddr(laddr string) (string, bool) {
+	Mutex.Lock()
+	defer Mutex.Lock()
+	raddr, ok := LAddrToRAddr[laddr]
+	return raddr, ok
+}
+
+func SetRAddrToLAddr(laddr string, raddr string) {
+	Mutex.Lock()
+	defer Mutex.Lock()
+	LAddrToRAddr[laddr] = raddr
+}
+
 var NameToAddr = map[string]string{}
 var ShadowAddr = ""
 

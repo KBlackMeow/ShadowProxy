@@ -126,8 +126,8 @@ func UConnectionHandler(addr *net.UDPAddr, buffer []byte, n int, backendAddr str
 	udpConn.RecvTime = time.Now()
 
 	UDPConns[addr.String()] = udpConn
-	LAddrToRAddr[backend.LocalAddr().String()] = addr.String()
-
+	// LAddrToRAddr[backend.LocalAddr().String()] = addr.String()
+	SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
 	n2, err := backend.Write(buffer[:n])
 	if err != nil {
 		logger.Error("UDP", err)

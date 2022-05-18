@@ -46,7 +46,7 @@ func (service Service) verifyToken(remoteAddr string, token string) bool {
 
 func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
-	remoteAddr, ok := proxy.LAddrToRAddr[r.RemoteAddr]
+	remoteAddr, ok := proxy.GetRAddrFromLAddr(r.RemoteAddr)
 
 	if ok {
 
