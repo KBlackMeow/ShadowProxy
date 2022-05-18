@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"flag"
 	"shadowproxy/config"
 )
 
@@ -24,7 +23,6 @@ func RunProxy() {
 		go RunUPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
 
 	} else {
-		flag.Usage()
 		return
 	}
 
