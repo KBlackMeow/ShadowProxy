@@ -12,10 +12,10 @@ import (
 // UDP Port Proxy
 
 type UDPConn struct {
-	addr     string
-	conn     net.Conn
-	ttl      int64
-	recvtime time.Time
+	Addr     string
+	Conn     net.Conn
+	TTL      int64
+	RecvTime time.Time
 }
 
 var UDPConns = map[string]*UDPConn{}
@@ -26,8 +26,8 @@ func CleanTimeoutUDPConn() {
 	for {
 		UDPMutex.Lock()
 		for k, v := range UDPConns {
-			if time.Now().Sub(v.recvtime).Milliseconds() > v.ttl {
-				v.conn.Close()
+			if time.Now().Sub(v.RecvTime).Milliseconds() > v.TTL {
+				v.Conn.Close()
 				delete(UDPConns, k)
 			}
 		}
@@ -43,7 +43,7 @@ func CleanAllUDPConn() {
 	defer UDPMutex.Unlock()
 
 	for k, v := range UDPConns {
-		v.conn.Close()
+		v.Conn.Close()
 		delete(UDPConns, k)
 	}
 
@@ -96,18 +96,18 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 
 		ids.PackageLengthRecorder(addr.String(), n1)
 
-		n2, err := UDPConns[addr.String()].conn.Write(buffer[:n1])
+		n2, err := UDPConns[addr.String()].Conn.Write(buffer[:n1])
 
 		if err != nil {
 
 			logger.Error("UDP", err)
-			UDPConns[addr.String()].conn.Close()
+			UDPConns[addr.String()].Conn.Close()
 			delete(UDPConns, addr.String())
 			continue
 		}
 
-		logger.Log("UDP", addr.String(), "->", udpConn.conn.RemoteAddr().String(), n2, "Bytes")
-		UDPConns[addr.String()].recvtime = time.Now()
+		logger.Log("UDP", addr.String(), "->", udpConn.Conn.RemoteAddr().String(), n2, "Bytes")
+		UDPConns[addr.String()].RecvTime = time.Now()
 	}
 }
 
@@ -124,10 +124,10 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 	}
 
 	logger.Log("UDP", backendAddr, "Bob connected.")
-	udpConn.addr = addr.String()
-	udpConn.conn = backend
-	udpConn.ttl = 10000
-	udpConn.recvtime = time.Now()
+	udpConn.Addr = addr.String()
+	udpConn.Conn = backend
+	udpConn.TTL = 10000
+	udpConn.RecvTime = time.Now()
 
 	UDPConns[addr.String()] = udpConn
 	LAddrToRAddr[backend.LocalAddr().String()] = addr.String()
@@ -160,7 +160,7 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 		}
 
 		logger.Log("UDP", backendAddr, "->", addr.String(), n2, "Bytes")
-		udpConn.recvtime = time.Now()
+		udpConn.RecvTime = time.Now()
 	}
 }
 
