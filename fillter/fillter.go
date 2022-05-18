@@ -15,6 +15,7 @@ type IPStatue struct {
 }
 
 func Fillter(addr string) bool {
+
 	addr = net.ParseIP(addr).String()
 
 	var ret = false
@@ -22,12 +23,14 @@ func Fillter(addr string) bool {
 	ret = ret || BlackListFillter(addr)
 	ret = ret && config.ShadowProxyConfig.EnableFillter
 	return ret
+
 }
 
 var IPStatuList = map[string]*IPStatue{}
 var Mutex = new(sync.Mutex)
 
 func AppendWhiteList(addr string) {
+
 	addr = net.ParseIP(addr).String()
 
 	Mutex.Lock()
@@ -40,9 +43,11 @@ func AppendWhiteList(addr string) {
 	}
 
 	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1}
+
 }
 
 func WhiteListFillter(addr string) bool {
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
@@ -53,9 +58,11 @@ func WhiteListFillter(addr string) bool {
 		}
 	}
 	return true
+
 }
 
 func AppendBlackList(addr string) {
+
 	addr = net.ParseIP(addr).String()
 
 	Mutex.Lock()
@@ -73,6 +80,7 @@ func AppendBlackList(addr string) {
 }
 
 func BlackListFillter(addr string) bool {
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
@@ -84,4 +92,5 @@ func BlackListFillter(addr string) bool {
 	}
 
 	return false
+
 }

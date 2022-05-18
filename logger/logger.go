@@ -9,12 +9,15 @@ import (
 )
 
 func TimeNow() string {
+
 	return time.Now().Format("2006-01-02 15:04:05")
+
 }
 
 var Mutex = new(sync.Mutex)
 
 func Log(info ...any) {
+
 	if config.ShadowProxyConfig.LogLevel > 0 {
 		return
 	}
@@ -31,9 +34,11 @@ func Log(info ...any) {
 	} else {
 		WriteFileln(out)
 	}
+
 }
 
 func Warn(info ...any) {
+
 	if config.ShadowProxyConfig.LogLevel > 1 {
 		return
 	}
@@ -50,9 +55,11 @@ func Warn(info ...any) {
 	} else {
 		WriteFileln(out)
 	}
+
 }
 
 func Error(err ...any) {
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
@@ -69,6 +76,7 @@ func Error(err ...any) {
 }
 
 func WriteFileln(s string) {
+
 	s = s + "\n"
 	logFile, err := os.OpenFile("shadowproxy.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -76,4 +84,5 @@ func WriteFileln(s string) {
 	}
 
 	logFile.WriteString(s)
+
 }

@@ -23,6 +23,7 @@ var FilePath = "config.yaml"
 var ShadowProxyConfig Config
 
 func InitConfig() {
+
 	config := Config{}
 	content, err := ioutil.ReadFile(FilePath)
 	if err != nil {
@@ -34,10 +35,13 @@ func InitConfig() {
 		panic(err)
 	}
 	ShadowProxyConfig = config
+
 }
 
 func GenEmptyConfig() {
+
 	ShadowProxyConfig = Config{
+
 		BindAddr:      "0.0.0.0:30000",
 		BackendAddr:   "127.0.0.1:40000",
 		Protocol:      "tcp/udp",
@@ -52,4 +56,5 @@ func GenEmptyConfig() {
 		panic(err)
 	}
 	ioutil.WriteFile(FilePath, content, 0666)
+
 }

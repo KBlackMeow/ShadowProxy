@@ -12,6 +12,7 @@ import (
 )
 
 func GenerateRSAKey(bits int) {
+
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		panic(err)
@@ -41,9 +42,11 @@ func GenerateRSAKey(bits int) {
 
 	publicBlock := pem.Block{Type: "RSA Public Key", Bytes: X509PublicKey}
 	pem.Encode(publicFile, &publicBlock)
+
 }
 
 func RSA_Encrypt(plainText []byte, path string) []byte {
+
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -68,9 +71,11 @@ func RSA_Encrypt(plainText []byte, path string) []byte {
 	}
 
 	return cipherText
+
 }
 
 func RSA_Decrypt(cipherText []byte, path string) []byte {
+
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -90,9 +95,11 @@ func RSA_Decrypt(cipherText []byte, path string) []byte {
 	plainText, _ := rsa.DecryptPKCS1v15(rand.Reader, privateKey, cipherText)
 
 	return plainText
+
 }
 
 func RSA_DigitalSignature(msg []byte, path string) []byte {
+
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -113,9 +120,11 @@ func RSA_DigitalSignature(msg []byte, path string) []byte {
 	signbyt, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA512, msghash[:])
 
 	return signbyt
+
 }
 
 func RSA_DigitalSignatureVerify(msg []byte, sign []byte, path string) bool {
+
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -142,9 +151,11 @@ func RSA_DigitalSignatureVerify(msg []byte, sign []byte, path string) bool {
 		return false
 	}
 	return true
+
 }
 
 func GetKey(path string) string {
+
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -156,30 +167,41 @@ func GetKey(path string) string {
 	file.Read(buf)
 
 	return string(buf)
+
 }
 
 func EncryptRSAToString(msg string) string {
+
 	cmsg := RSA_Encrypt([]byte(msg), "public.pem")
 	cmsgb64 := base64.StdEncoding.EncodeToString(cmsg)
 	return cmsgb64
+
 }
 
 func DecryptRSAToString(cmsgb64 string) string {
+
 	cmsg, _ := base64.StdEncoding.DecodeString(cmsgb64)
 	return string(RSA_Decrypt(cmsg, "private.pem"))
+
 }
 
 func DigitalSignature(msg string) string {
+
 	msgin := RSA_DigitalSignature([]byte(msg), "private.pem")
 	msginb64 := base64.StdEncoding.EncodeToString(msgin)
 	return msginb64
+
 }
 
 func DigitalSignatureVerify(msg string, sign string) bool {
+
 	msgin, _ := base64.StdEncoding.DecodeString(sign)
 	return RSA_DigitalSignatureVerify([]byte(msg), msgin, "public.pem")
+
 }
 
 func init() {
+
 	GenerateRSAKey(2048)
+
 }

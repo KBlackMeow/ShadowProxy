@@ -11,22 +11,27 @@ var Mutex = new(sync.Mutex)
 var LAddrToRAddr = map[string]string{}
 
 func GetRAddrFromLAddr(laddr string) (string, bool) {
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
 	raddr, ok := LAddrToRAddr[laddr]
 	return raddr, ok
+
 }
 
 func SetRAddrToLAddr(laddr string, raddr string) {
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
 	LAddrToRAddr[laddr] = raddr
+
 }
 
 var NameToAddr = map[string]string{}
 var ShadowAddr = ""
 
 func RunProxy() {
+
 	if config.ShadowProxyConfig.Protocol == "tcp" {
 		WG.Add(1)
 		go RunTPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
@@ -45,4 +50,5 @@ func RunProxy() {
 	}
 
 	WG.Wait()
+
 }

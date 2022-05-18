@@ -11,6 +11,7 @@ import (
 var ShadowAddr string
 
 func InitShadowService() {
+
 	serviceName := config.ShadowProxyConfig.Shadow
 
 	serviceAddr, ok := proxy.NameToAddr[serviceName]
@@ -29,4 +30,5 @@ func InitShadowService() {
 	}
 
 	proxy.ShadowAddr = ""
+
 }

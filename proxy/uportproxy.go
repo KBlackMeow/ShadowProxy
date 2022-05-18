@@ -23,6 +23,7 @@ var UDPConns = map[string]*UDPConn{}
 var UDPMutex = new(sync.Mutex)
 
 func SetUDPConn(addr string, conn *UDPConn) {
+
 	UDPMutex.Lock()
 	defer UDPMutex.Unlock()
 	UDPConns[addr] = conn
@@ -30,6 +31,7 @@ func SetUDPConn(addr string, conn *UDPConn) {
 }
 
 func GetUDPConn(addr string) (*UDPConn, bool) {
+
 	UDPMutex.Lock()
 	defer UDPMutex.Unlock()
 	udpConn, ok := UDPConns[addr]
@@ -38,10 +40,13 @@ func GetUDPConn(addr string) (*UDPConn, bool) {
 }
 
 func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
+
 	return Sender.WriteToUDP(buff[:n], udpConn.Addr)
+
 }
 
 func CleanTimeoutUDPConn() {
+
 	for {
 		for k, v := range UDPConns {
 			if time.Now().Sub(v.RecvTime).Milliseconds() > v.TTL {
@@ -56,13 +61,16 @@ func CleanTimeoutUDPConn() {
 }
 
 func CleanAllUDPConn() {
+
 	for k, v := range UDPConns {
 		v.remoteConn.Close()
 		delete(UDPConns, k)
 	}
+
 }
 
 func RunUPortProxy(bindAddr, backendAddr string) {
+
 	udpLAddr, _ := net.ResolveUDPAddr("udp4", bindAddr)
 	listener, err := net.ListenUDP("udp4", udpLAddr)
 
@@ -111,9 +119,11 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 		logger.Log("UDP", addr.String(), "->", udpConn.remoteConn.RemoteAddr().String(), n2, "Bytes")
 		UDPConns[addr.String()].RecvTime = time.Now()
 	}
+
 }
 
 func UConnectionHandler(addr *net.UDPAddr, buffer []byte, n int, backendAddr string) {
+
 	logger.Log("UDP", addr.String(), "Alice connected.")
 	backend, err := net.Dial("udp", backendAddr)
 	if err != nil {
@@ -158,8 +168,11 @@ func UConnectionHandler(addr *net.UDPAddr, buffer []byte, n int, backendAddr str
 		logger.Log("UDP", backendAddr, "->", addr.String(), n2, "Bytes")
 		udpConn.RecvTime = time.Now()
 	}
+
 }
 
 func init() {
+
 	go CleanTimeoutUDPConn()
+
 }

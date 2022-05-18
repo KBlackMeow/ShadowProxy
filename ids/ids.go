@@ -17,14 +17,19 @@ type Guest struct {
 }
 
 func (guest *Guest) visited() {
+
 	guest.VisitTimeRecorder = append(guest.VisitTimeRecorder, int(time.Now().UnixMilli()))
+
 }
 
 func (guest *Guest) sent(length int) {
+
 	guest.PackageLengthRecoder = append(guest.PackageLengthRecoder, length)
+
 }
 
 func (guest Guest) count() int {
+
 	ret := 0
 	nowTime := int(time.Now().UnixMilli())
 
@@ -44,13 +49,17 @@ func (guest Guest) count() int {
 	}
 	guest.VisitTimeRecorder = guest.VisitTimeRecorder[index:]
 	return ret
+
 }
 
 func (guest Guest) PackageCheck() {
+
 	return
+
 }
 
 func CheckIP(addr string) {
+
 	addr = net.ParseIP(addr).String()
 
 	Mutex.Lock()
@@ -68,9 +77,11 @@ func CheckIP(addr string) {
 	if guest.count() >= 5 {
 		fillter.AppendBlackList(addr)
 	}
+
 }
 
 func PackageLengthRecorder(addr string, length int) {
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
