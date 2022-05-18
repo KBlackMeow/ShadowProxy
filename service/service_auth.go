@@ -29,7 +29,6 @@ type UserInfo struct {
 }
 
 func (service AuthService) token(remoteAddr string) string {
-
 	remoteAddr, ok := proxy.LAddrToRAddr[remoteAddr]
 	if ok {
 		return cryptotools.Hash_SHA512(remoteAddr)
@@ -45,11 +44,9 @@ func (service Service) verifyToken(remoteAddr string, token string) bool {
 }
 
 func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
-
 	remoteAddr, ok := proxy.GetRAddrFromLAddr(r.RemoteAddr)
 
 	if ok {
-
 		var loginfo LoginInfo
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&loginfo)
@@ -106,11 +103,9 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 	userinfo := UserInfo{}
 	res, _ := json.Marshal(&userinfo)
 	fmt.Fprintf(w, string(res))
-
 }
 
 func (service AuthService) auth(w http.ResponseWriter, r *http.Request) {
-
 	temp, err := template.ParseFiles("template/auth.html")
 	if err != nil {
 		logger.Error(err)
@@ -127,13 +122,11 @@ func (service AuthService) auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (service AuthService) Contraller() {
-
 	http.HandleFunc("/auth", service.auth)
 	http.HandleFunc("/verify", service.verify)
 }
 
 func (service AuthService) Run() {
-
 	logger.Log("Auth Service Starting...")
 	err := http.ListenAndServe(service.serviceAddr, nil)
 	if err != nil {
@@ -150,9 +143,7 @@ func (service AuthService) GetAddr() string {
 }
 
 func init() {
-
 	service := AuthService{Service{serviceName: "auth", serviceAddr: "127.0.0.1:57575"}}
 	service.Contraller()
 	ServiceAppend(service)
-
 }

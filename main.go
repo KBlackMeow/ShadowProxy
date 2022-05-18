@@ -20,7 +20,6 @@ func ComponentInit() {
 }
 
 func main() {
-
 	help := flag.Bool("help", false, "print usage")
 	cfg := flag.String("config", "", "use config file")
 
@@ -32,14 +31,8 @@ func main() {
 	}
 
 	if *cfg != "" {
-
 		config.FilePath = *cfg
-
 	}
-	/**
-	init
-	*/
 
 	ComponentInit()
-
 }
