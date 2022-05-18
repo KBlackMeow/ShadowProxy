@@ -79,7 +79,6 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if (time.Now().UnixMilli()-msgUnixTime) > 0 && (time.Now().UnixMilli()-msgUnixTime) < 1000 && password == cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
-
 			fillter.AppendWhiteList(remoteAddr)
 
 			userinfo := UserInfo{UserAddr: remoteAddr, UserLoginTime: logger.TimeNow()}
