@@ -13,8 +13,8 @@ import (
 
 type UDPConn struct {
 	addr     string
-	backend  net.Conn
-	ttl      uint64
+	conn     net.Conn
+	ttl      int64
 	recvtime time.Time
 }
 
@@ -26,8 +26,8 @@ func CleanTimeoutUDPConn() {
 	for {
 		UDPMutex.Lock()
 		for k, v := range UDPConns {
-			if uint64(time.Now().Sub(v.recvtime).Nanoseconds()/1e6) > v.ttl {
-				v.backend.Close()
+			if time.Now().Sub(v.recvtime).Milliseconds() > v.ttl {
+				v.conn.Close()
 				delete(UDPConns, k)
 			}
 		}
@@ -43,7 +43,7 @@ func CleanAllUDPConn() {
 	defer UDPMutex.Unlock()
 
 	for k, v := range UDPConns {
-		v.backend.Close()
+		v.conn.Close()
 		delete(UDPConns, k)
 	}
 
@@ -75,8 +75,10 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 			WG.Done()
 			return
 		}
+		UDPMutex.Lock()
+		defer UDPMutex.Unlock()
 
-		conn, ok := UDPConns[addr.String()]
+		udpConn, ok := UDPConns[addr.String()]
 
 		if !ok {
 
@@ -87,34 +89,34 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 
 				ids.CheckAddr(addr.String())
 
-				go UConnectionHandler(addr, listener, buffer, n1, backendAddr, UDPConns)
+				go UConnectionHandler(addr, listener, buffer, n1, backendAddr)
 			}
 			continue
 		}
 
 		ids.PackageLengthRecorder(addr.String(), n1)
 
-		n2, err := UDPConns[addr.String()].backend.Write(buffer[:n1])
+		n2, err := UDPConns[addr.String()].conn.Write(buffer[:n1])
 
 		if err != nil {
 
 			logger.Error("UDP", err)
-			UDPConns[addr.String()].backend.Close()
+			UDPConns[addr.String()].conn.Close()
 			delete(UDPConns, addr.String())
 			continue
 		}
 
-		logger.Log("UDP", addr.String(), "->", conn.backend.RemoteAddr().String(), n2, "Bytes")
+		logger.Log("UDP", addr.String(), "->", udpConn.conn.RemoteAddr().String(), n2, "Bytes")
 		UDPConns[addr.String()].recvtime = time.Now()
 	}
 }
 
-func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte, n int, backendAddr string, conns map[string]*UDPConn) {
+func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte, n int, backendAddr string) {
 
 	logger.Log("UDP", addr.String(), "Alice connected.")
 
 	backend, err := net.Dial("udp", backendAddr)
-	conn := new(UDPConn)
+	udpConn := new(UDPConn)
 
 	if err != nil {
 		logger.Error("UDP", err)
@@ -122,13 +124,12 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 	}
 
 	logger.Log("UDP", backendAddr, "Bob connected.")
-	conn.addr = addr.String()
-	conn.backend = backend
-	conn.ttl = 10000
-	conn.recvtime = time.Now()
+	udpConn.addr = addr.String()
+	udpConn.conn = backend
+	udpConn.ttl = 10000
+	udpConn.recvtime = time.Now()
 
-	conns[addr.String()] = conn
-
+	UDPConns[addr.String()] = udpConn
 	LAddrToRAddr[backend.LocalAddr().String()] = addr.String()
 
 	n2, err := backend.Write(buffer[:n])
@@ -159,7 +160,7 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 		}
 
 		logger.Log("UDP", backendAddr, "->", addr.String(), n2, "Bytes")
-		conn.recvtime = time.Now()
+		udpConn.recvtime = time.Now()
 	}
 }
 
