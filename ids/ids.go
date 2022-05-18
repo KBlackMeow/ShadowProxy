@@ -34,6 +34,7 @@ func (guest Guest) count() int {
 			ret++
 		}
 	}
+
 	length := len(guest.VisitTimeRecorder)
 	var index int
 	if length < 20 {
@@ -49,8 +50,7 @@ func (guest Guest) PackageCheck() {
 	return
 }
 
-func CheckAddr(addr string) {
-
+func CheckIP(addr string) {
 	addr = net.ParseIP(addr).String()
 
 	Mutex.Lock()
@@ -71,7 +71,6 @@ func CheckAddr(addr string) {
 }
 
 func PackageLengthRecorder(addr string, length int) {
-
 	Mutex.Lock()
 	defer Mutex.Unlock()
 

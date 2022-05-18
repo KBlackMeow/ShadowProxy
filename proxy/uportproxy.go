@@ -92,7 +92,7 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 			if fillter.Fillter(addr.String()) {
 				logger.Warn("UDP", addr.String(), "Alice is filtrated")
 			} else {
-				ids.CheckAddr(addr.String())
+				ids.CheckIP(addr.String())
 				go UConnectionHandler(addr, buffer, n1, backendAddr)
 			}
 			continue

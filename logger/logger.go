@@ -18,8 +18,10 @@ func Log(info ...any) {
 	if config.ShadowProxyConfig.LogLevel > 0 {
 		return
 	}
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
+
 	out := fmt.Sprint(TimeNow(), " [+] : ")
 	for _, s := range info {
 		out += fmt.Sprint(s, " ")
@@ -35,8 +37,10 @@ func Warn(info ...any) {
 	if config.ShadowProxyConfig.LogLevel > 1 {
 		return
 	}
+
 	Mutex.Lock()
 	defer Mutex.Unlock()
+
 	out := fmt.Sprint(TimeNow(), " [-] : ")
 	for _, s := range info {
 		out += fmt.Sprint(s, " ")
@@ -51,6 +55,7 @@ func Warn(info ...any) {
 func Error(err ...any) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
+
 	out := fmt.Sprint(TimeNow(), " [*] : ")
 	for _, s := range err {
 		out += fmt.Sprint(s, " ")
