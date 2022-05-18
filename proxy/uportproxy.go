@@ -9,22 +9,19 @@ import (
 )
 
 // UDP Port Proxy
+var Sender net.UDPConn
+var UDPConns = map[string]*UDPConn{}
 
 type UDPConn struct {
 	Addr       *net.UDPAddr
 	remoteConn net.Conn
-	localConn  net.UDPConn
 	TTL        int64
 	RecvTime   time.Time
 }
 
-var Sender net.UDPConn
-
 func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
 	return Sender.WriteToUDP(buff[:n], udpConn.Addr)
 }
-
-var UDPConns = map[string]*UDPConn{}
 
 func CleanTimeoutUDPConn() {
 
