@@ -5,7 +5,6 @@ import (
 	"shadowproxy/fillter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
-	"sync"
 	"time"
 )
 
@@ -15,7 +14,6 @@ type IPConns struct {
 }
 
 var IPToConns = map[string]*IPConns{}
-var WG sync.WaitGroup
 
 func AddConnToIP(conn net.Conn, addr string) {
 
@@ -33,7 +31,6 @@ func AddConnToIP(conn net.Conn, addr string) {
 func TimeoutCloseConn(addr string, dely uint64) {
 
 	addr = net.ParseIP(addr).String()
-
 	time.Sleep(time.Duration(dely) * time.Millisecond)
 
 	ipConns, ok := IPToConns[addr]
@@ -58,7 +55,6 @@ func RunTPortProxy(bindAddr string, backendAddr string) {
 	}
 
 	defer listener.Close()
-
 	logger.Log("TCP", bindAddr, "tcp-proxy started.")
 
 	for {
@@ -70,12 +66,10 @@ func RunTPortProxy(bindAddr string, backendAddr string) {
 		}
 		ids.CheckAddr(conn.RemoteAddr().String())
 		if fillter.Fillter(conn.RemoteAddr().String()) {
-
 			logger.Warn("TCP", conn.RemoteAddr().String(), "Alice is filtrated", "Shadow is", ShadowAddr)
 			go TConnectionHandler(conn, ShadowAddr)
 
 		} else {
-
 			go TConnectionHandler(conn, backendAddr)
 		}
 	}
@@ -94,22 +88,17 @@ func TConnectionHandler(conn net.Conn, backendAddr string) {
 	backend, err := net.Dial("tcp", backendAddr)
 
 	defer conn.Close()
-
 	if err != nil {
 		logger.Error("TCP", err)
 		return
 	}
-
-	// LAddrToRAddr[backend.LocalAddr().String()] = conn.RemoteAddr().String()
-	SetRAddrToLAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
-	AddConnToIP(backend, conn.RemoteAddr().String())
-
 	defer backend.Close()
 
+	SetRAddrToLAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
+	AddConnToIP(backend, conn.RemoteAddr().String())
 	logger.Log("TCP", backendAddr, "Bob connected.")
 
 	closed := make(chan bool, 2)
-
 	go TProxy(conn, backend, closed, true)
 	go TProxy(backend, conn, closed, false)
 	<-closed
@@ -123,11 +112,11 @@ func TConnectionHandler(conn net.Conn, backendAddr string) {
 func TProxy(from net.Conn, to net.Conn, closed chan bool, remhost bool) {
 
 	buffer := make([]byte, 4096)
+
 	for {
 
 		n1, err := from.Read(buffer)
 		if err != nil {
-
 			closed <- true
 			return
 		}
@@ -140,7 +129,6 @@ func TProxy(from net.Conn, to net.Conn, closed chan bool, remhost bool) {
 		logger.Log("TCP", from.RemoteAddr().String(), "->", to.RemoteAddr().String(), n2, "Bytes")
 
 		if err != nil {
-
 			closed <- true
 			return
 		}
