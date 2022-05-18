@@ -75,7 +75,7 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 	logger.Log("UDP", addr.String(), "Alice connected.")
 
 	backend, err := net.Dial("udp", backendAddr)
-	link := new(UDPConn)
+	conn := new(UDPConn)
 
 	if err != nil {
 		logger.Error("UDP", err)
@@ -83,12 +83,12 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 	}
 
 	logger.Log("UDP", backendAddr, "Bob connected.")
-	link.addr = addr.String()
-	link.backend = backend
-	link.ttl = 10000
-	link.recvtime = time.Now()
+	conn.addr = addr.String()
+	conn.backend = backend
+	conn.ttl = 10000
+	conn.recvtime = time.Now()
 
-	conns[addr.String()] = link
+	conns[addr.String()] = conn
 
 	n2, err := backend.Write(buffer[:n])
 	if err != nil {
@@ -118,6 +118,6 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 		}
 
 		logger.Log("UDP", backendAddr, "->", addr.String(), n2, "Bytes")
-		link.recvtime = time.Now()
+		conn.recvtime = time.Now()
 	}
 }
