@@ -29,7 +29,7 @@ type UserInfo struct {
 }
 
 func (service AuthService) token(remoteAddr string) string {
-	remoteAddr, ok := proxy.LAddrToRAddr[remoteAddr]
+	remoteAddr, ok := proxy.GetRAddrFromLAddr(remoteAddr)
 	if ok {
 		return cryptotools.Hash_SHA512(remoteAddr)
 	}

@@ -13,7 +13,7 @@ type FlagService struct {
 }
 
 func (service FlagService) flag(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Flag{"+cryptotools.Hash_MD5("flag")+"}")
+	fmt.Fprintf(w, "flag{"+cryptotools.Hash_MD5("flag")+"}")
 }
 
 func (service FlagService) Run() {
