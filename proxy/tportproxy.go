@@ -17,14 +17,14 @@ type IPConns struct {
 var IPToConns = map[string]*IPConns{}
 var WG sync.WaitGroup
 
-var Mutex = new(sync.Mutex)
+var TCPMutex = new(sync.Mutex)
 
 func AddConnToIP(conn net.Conn, addr string) {
 
 	ip := net.ParseIP(addr).String()
 
-	Mutex.Lock()
-	defer Mutex.Unlock()
+	TCPMutex.Lock()
+	defer TCPMutex.Unlock()
 
 	ipConns, ok := IPToConns[ip]
 	if ok {
@@ -41,8 +41,8 @@ func TimeoutCloseConn(addr string, dely uint64) {
 
 	time.Sleep(time.Duration(dely) * time.Millisecond)
 
-	Mutex.Lock()
-	defer Mutex.Unlock()
+	TCPMutex.Lock()
+	defer TCPMutex.Unlock()
 	ipConns, ok := IPToConns[addr]
 	if ok {
 		for _, v := range ipConns.Conns {

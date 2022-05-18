@@ -5,6 +5,7 @@ import (
 	"shadowproxy/fillter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
+	"sync"
 	"time"
 )
 
@@ -18,18 +19,19 @@ type UDPConn struct {
 }
 
 var UDPConns = map[string]*UDPConn{}
+var UDPMutex = new(sync.Mutex)
 
 func CleanTimeoutUDPConn() {
 
 	for {
-		Mutex.Lock()
+		UDPMutex.Lock()
 		for k, v := range UDPConns {
 			if uint64(time.Now().Sub(v.recvtime).Nanoseconds()/1e6) > v.ttl {
 				v.backend.Close()
 				delete(UDPConns, k)
 			}
 		}
-		Mutex.Unlock()
+		UDPMutex.Unlock()
 		time.Sleep(time.Duration(500) * time.Millisecond)
 	}
 
@@ -37,8 +39,8 @@ func CleanTimeoutUDPConn() {
 
 func CleanAllUDPConn() {
 
-	Mutex.Lock()
-	defer Mutex.Unlock()
+	UDPMutex.Lock()
+	defer UDPMutex.Unlock()
 
 	for k, v := range UDPConns {
 		v.backend.Close()
