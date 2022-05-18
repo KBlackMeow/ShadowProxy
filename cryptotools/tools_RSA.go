@@ -12,14 +12,12 @@ import (
 )
 
 func GenerateRSAKey(bits int) {
-
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		panic(err)
 	}
 
 	X509PrivateKey := x509.MarshalPKCS1PrivateKey(privateKey)
-
 	privateFile, err := os.Create("private.pem")
 	if err != nil {
 		panic(err)
@@ -27,9 +25,7 @@ func GenerateRSAKey(bits int) {
 	defer privateFile.Close()
 
 	privateBlock := pem.Block{Type: "RSA Private Key", Bytes: X509PrivateKey}
-
 	pem.Encode(privateFile, &privateBlock)
-
 	publicKey := privateKey.PublicKey
 
 	X509PublicKey, err := x509.MarshalPKIXPublicKey(&publicKey)
@@ -44,13 +40,10 @@ func GenerateRSAKey(bits int) {
 	defer publicFile.Close()
 
 	publicBlock := pem.Block{Type: "RSA Public Key", Bytes: X509PublicKey}
-
 	pem.Encode(publicFile, &publicBlock)
-
 }
 
 func RSA_Encrypt(plainText []byte, path string) []byte {
-
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -69,7 +62,6 @@ func RSA_Encrypt(plainText []byte, path string) []byte {
 	}
 
 	publicKey := publicKeyInterface.(*rsa.PublicKey)
-
 	cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, plainText)
 	if err != nil {
 		panic(err)
@@ -79,7 +71,6 @@ func RSA_Encrypt(plainText []byte, path string) []byte {
 }
 
 func RSA_Decrypt(cipherText []byte, path string) []byte {
-
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -91,7 +82,6 @@ func RSA_Decrypt(cipherText []byte, path string) []byte {
 	file.Read(buf)
 
 	block, _ := pem.Decode(buf)
-
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		panic(err)
@@ -103,7 +93,6 @@ func RSA_Decrypt(cipherText []byte, path string) []byte {
 }
 
 func RSA_DigitalSignature(msg []byte, path string) []byte {
-
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
@@ -115,7 +104,6 @@ func RSA_DigitalSignature(msg []byte, path string) []byte {
 	file.Read(buf)
 
 	block, _ := pem.Decode(buf)
-
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		panic(err)
@@ -128,7 +116,6 @@ func RSA_DigitalSignature(msg []byte, path string) []byte {
 }
 
 func RSA_DigitalSignatureVerify(msg []byte, sign []byte, path string) bool {
-
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
