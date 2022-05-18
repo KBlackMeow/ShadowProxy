@@ -18,8 +18,10 @@ type UDPConn struct {
 	RecvTime   time.Time
 }
 
+var Sender net.UDPConn
+
 func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
-	return udpConn.localConn.WriteToUDP(buff[:n], udpConn.Addr)
+	return Sender.WriteToUDP(buff[:n], udpConn.Addr)
 }
 
 var UDPConns = map[string]*UDPConn{}
@@ -50,8 +52,8 @@ func CleanAllUDPConn() {
 
 func RunUPortProxy(bindAddr, backendAddr string) {
 
-	udpLAddr, _ := net.ResolveUDPAddr("udp", bindAddr)
-	listener, err := net.ListenUDP("udp", udpLAddr)
+	udpLAddr, _ := net.ResolveUDPAddr("udp4", bindAddr)
+	listener, err := net.ListenUDP("udp4", udpLAddr)
 
 	if err != nil {
 
@@ -59,6 +61,8 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 		WG.Done()
 		return
 	}
+
+	Sender = *listener
 
 	defer listener.Close()
 
@@ -84,7 +88,7 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 			} else {
 
 				ids.CheckAddr(addr.String())
-				go UConnectionHandler(addr, listener, buffer, n1, backendAddr)
+				go UConnectionHandler(addr, buffer, n1, backendAddr)
 			}
 			continue
 		}
@@ -106,7 +110,7 @@ func RunUPortProxy(bindAddr, backendAddr string) {
 	}
 }
 
-func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte, n int, backendAddr string) {
+func UConnectionHandler(addr *net.UDPAddr, buffer []byte, n int, backendAddr string) {
 
 	logger.Log("UDP", addr.String(), "Alice connected.")
 
@@ -123,7 +127,7 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 	udpConn.remoteConn = backend
 	udpConn.TTL = 10000
 	udpConn.RecvTime = time.Now()
-	udpConn.localConn = *listener
+
 	UDPConns[addr.String()] = udpConn
 	LAddrToRAddr[backend.LocalAddr().String()] = addr.String()
 
@@ -147,8 +151,7 @@ func UConnectionHandler(addr *net.UDPAddr, listener *net.UDPConn, buffer []byte,
 			return
 		}
 
-		// n2, err := listener.WriteToUDP(buffer[:n1], addr)
-		n2, err := udpConn.WriteToUDP(buffer[:n1], n1)
+		n2, err := udpConn.WriteToUDP(buffer, n1)
 		if err != nil {
 			logger.Error("UDP", err)
 			return
