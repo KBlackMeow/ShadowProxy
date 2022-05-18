@@ -17,14 +17,9 @@ type IPConns struct {
 var IPToConns = map[string]*IPConns{}
 var WG sync.WaitGroup
 
-var TCPMutex = new(sync.Mutex)
-
 func AddConnToIP(conn net.Conn, addr string) {
 
 	ip := net.ParseIP(addr).String()
-
-	TCPMutex.Lock()
-	defer TCPMutex.Unlock()
 
 	ipConns, ok := IPToConns[ip]
 	if ok {
@@ -41,8 +36,6 @@ func TimeoutCloseConn(addr string, dely uint64) {
 
 	time.Sleep(time.Duration(dely) * time.Millisecond)
 
-	TCPMutex.Lock()
-	defer TCPMutex.Unlock()
 	ipConns, ok := IPToConns[addr]
 	if ok {
 		for _, v := range ipConns.Conns {
@@ -117,8 +110,8 @@ func TConnectionHandler(conn net.Conn, backendAddr string) {
 
 	closed := make(chan bool, 2)
 
-	go TProxy(conn, backend, closed)
-	go TProxy(backend, conn, closed)
+	go TProxy(conn, backend, closed, true)
+	go TProxy(backend, conn, closed, false)
 	<-closed
 
 	delete(LAddrToRAddr, backend.LocalAddr().String())
@@ -127,7 +120,7 @@ func TConnectionHandler(conn net.Conn, backendAddr string) {
 	logger.Log("TCP", conn.RemoteAddr().String(), "Alice connection is closed.")
 }
 
-func TProxy(from net.Conn, to net.Conn, closed chan bool) {
+func TProxy(from net.Conn, to net.Conn, closed chan bool, remhost bool) {
 
 	buffer := make([]byte, 4096)
 	for {
@@ -139,7 +132,9 @@ func TProxy(from net.Conn, to net.Conn, closed chan bool) {
 			return
 		}
 
-		ids.PackageLengthRecorder(from.RemoteAddr().String(), n1)
+		if remhost {
+			ids.PackageLengthRecorder(from.RemoteAddr().String(), n1)
+		}
 
 		n2, err := to.Write(buffer[:n1])
 		logger.Log("TCP", from.RemoteAddr().String(), "->", to.RemoteAddr().String(), n2, "Bytes")
