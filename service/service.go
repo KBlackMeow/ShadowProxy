@@ -1,7 +1,7 @@
 package service
 
 import (
-	"shadowproxy/proxy"
+	"shadowproxy/config"
 )
 
 type Service struct {
@@ -15,19 +15,28 @@ type Runner interface {
 	GetAddr() string
 }
 
-var Services []Runner
+var Services = map[string]Runner{}
+var NameToAddr = map[string]string{}
 
-func ServiceAppend(work Runner) {
+func ServiceAppend(serviceName string, work Runner) {
 
-	Services = append(Services, work)
+	Services[serviceName] = work
 
+}
+
+func GetService(serviceName string) (Runner, bool) {
+	service, ok := Services[serviceName]
+	return service, ok
 }
 
 func InitServices() {
 
-	for _, service := range Services {
-		go service.Run()
-		proxy.NameToAddr[service.GetName()] = service.GetAddr()
+	for _, v := range config.ShadowProxyConfig.Services {
+		service, ok := GetService(v)
+		if ok {
+			NameToAddr[service.GetName()] = service.GetAddr()
+			go service.Run()
+		}
 	}
 
 }

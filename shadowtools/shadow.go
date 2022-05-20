@@ -3,23 +3,25 @@ package shadowtools
 import (
 	"net"
 	"shadowproxy/config"
+	"shadowproxy/logger"
 	"shadowproxy/proxy"
+	"shadowproxy/service"
 	"strconv"
 	"strings"
 )
 
-var ShadowAddr string
+// var ShadowAddr string
 
 func InitShadowService() {
 
 	serviceName := config.ShadowProxyConfig.Shadow
 
-	serviceAddr, ok := proxy.NameToAddr[serviceName]
+	serviceAddr, ok := service.NameToAddr[serviceName]
 	if ok {
 		proxy.ShadowAddr = serviceAddr
 		return
 	}
-
+	logger.Log(serviceName)
 	addrs := strings.Split(serviceName, ":")
 	addr := net.ParseIP(addrs[0])
 

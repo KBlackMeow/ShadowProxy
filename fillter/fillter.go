@@ -1,9 +1,9 @@
 package fillter
 
 import (
-	"net"
 	"shadowproxy/config"
 	"shadowproxy/logger"
+	"strings"
 	"sync"
 )
 
@@ -16,7 +16,7 @@ type IPStatue struct {
 
 func Fillter(addr string) bool {
 
-	addr = net.ParseIP(addr).String()
+	addr = strings.Split(addr, ":")[0]
 
 	var ret = false
 	ret = ret || WhiteListFillter(addr)
@@ -31,7 +31,7 @@ var Mutex = new(sync.Mutex)
 
 func AppendWhiteList(addr string) {
 
-	addr = net.ParseIP(addr).String()
+	addr = strings.Split(addr, ":")[0]
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
@@ -63,7 +63,7 @@ func WhiteListFillter(addr string) bool {
 
 func AppendBlackList(addr string) {
 
-	addr = net.ParseIP(addr).String()
+	addr = strings.Split(addr, ":")[0]
 
 	Mutex.Lock()
 	defer Mutex.Unlock()

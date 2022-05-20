@@ -8,15 +8,15 @@ import (
 )
 
 type Config struct {
-	BindAddr      string `yaml:"bindaddr"`
-	BackendAddr   string `yaml:"backendaddr"`
-	Protocol      string `yaml:"protocol"`
-	Shadow        string `yaml:"shadow"`
-	LogLevel      int    `yaml:"loglevel"`
-	Password      string `yaml:"password"`
-	EnableFillter bool   `yaml:"enablefillter"`
-	ConsoleOutput bool   `yaml:"consoleoutput"`
-	Debug         bool   `yaml:"debug"`
+	Protocol      string   `yaml:"protocol"`
+	Shadow        string   `yaml:"shadow"`
+	LogLevel      int      `yaml:"loglevel"`
+	Password      string   `yaml:"password"`
+	EnableFillter bool     `yaml:"enablefillter"`
+	ConsoleOutput bool     `yaml:"consoleoutput"`
+	Debug         bool     `yaml:"debug"`
+	Services      []string `yaml:"services"`
+	Rules         []string `yaml:"rules"`
 }
 
 var FilePath = "config.yaml"
@@ -41,15 +41,14 @@ func InitConfig() {
 func GenEmptyConfig() {
 
 	ShadowProxyConfig = Config{
-
-		BindAddr:      "0.0.0.0:30000",
-		BackendAddr:   "127.0.0.1:40000",
-		Protocol:      "tcp/udp",
+		Protocol:      "tcp",
 		Shadow:        "auth",
 		LogLevel:      0,
 		Password:      cryptotools.Hash_MD5("admin"),
 		EnableFillter: true,
 		ConsoleOutput: true,
+		Services:      []string{"auth", "flag"},
+		Rules:         []string{"0.0.0.0:30000->127.0.0.1:40000", "0.0.0.0:30050->127.0.0.1:40000"},
 	}
 	content, err := yaml.Marshal(ShadowProxyConfig)
 	if err != nil {

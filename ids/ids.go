@@ -1,8 +1,8 @@
 package ids
 
 import (
-	"net"
 	"shadowproxy/fillter"
+	"strings"
 	"sync"
 	"time"
 )
@@ -60,7 +60,7 @@ func (guest Guest) PackageCheck() {
 
 func CheckIP(addr string) {
 
-	addr = net.ParseIP(addr).String()
+	addr = strings.Split(addr, ":")[0]
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
@@ -85,7 +85,7 @@ func PackageLengthRecorder(addr string, length int) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
-	addr = net.ParseIP(addr).String()
+	addr = strings.Split(addr, ":")[0]
 
 	guest, ok := GuestMap[addr]
 	if !ok {

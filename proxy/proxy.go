@@ -27,23 +27,20 @@ func SetRAddrToLAddr(laddr string, raddr string) {
 
 }
 
-var NameToAddr = map[string]string{}
-var ShadowAddr = ""
-
 func RunProxy() {
 
 	if config.ShadowProxyConfig.Protocol == "tcp" {
 		WG.Add(1)
-		go RunTPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
+		go RunTPortProxy(config.ShadowProxyConfig.Rules)
 
 	} else if config.ShadowProxyConfig.Protocol == "udp" {
 		WG.Add(1)
-		go RunUPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
+		go RunUPortProxy(config.ShadowProxyConfig.Rules)
 
 	} else if config.ShadowProxyConfig.Protocol == "tcp/udp" {
 		WG.Add(2)
-		go RunTPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
-		go RunUPortProxy(config.ShadowProxyConfig.BindAddr, config.ShadowProxyConfig.BackendAddr)
+		go RunTPortProxy(config.ShadowProxyConfig.Rules)
+		go RunUPortProxy(config.ShadowProxyConfig.Rules)
 
 	} else {
 		return
