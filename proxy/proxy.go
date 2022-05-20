@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"shadowproxy/config"
+	"strings"
 	"sync"
 )
 
@@ -29,21 +30,14 @@ func SetRAddrToLAddr(laddr string, raddr string) {
 
 func RunProxy() {
 
-	if config.ShadowProxyConfig.Protocol == "tcp" {
+	for _, v := range config.ShadowProxyConfig.Rules {
 		WG.Add(1)
-		go RunTPortProxy(config.ShadowProxyConfig.Rules)
-
-	} else if config.ShadowProxyConfig.Protocol == "udp" {
-		WG.Add(1)
-		go RunUPortProxy(config.ShadowProxyConfig.Rules)
-
-	} else if config.ShadowProxyConfig.Protocol == "tcp/udp" {
-		WG.Add(2)
-		go RunTPortProxy(config.ShadowProxyConfig.Rules)
-		go RunUPortProxy(config.ShadowProxyConfig.Rules)
-
-	} else {
-		return
+		args := strings.Split(v, "://")
+		if args[0] == "tcp" {
+			go RunTPortProxy(args[1])
+		} else if args[0] == "udp" {
+			go RunUPortProxy(args[1])
+		}
 	}
 
 	WG.Wait()

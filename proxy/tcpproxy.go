@@ -148,14 +148,12 @@ func proxy(from net.Conn, to net.Conn, closed chan bool, RTL bool) {
 
 }
 
-func RunTPortProxy(rules []string) {
-	for _, rule := range rules {
-		args := strings.Split(rule, "->")
-		if len(args) == 2 {
-			proxy := TCPProxy{bindAddr: args[0], backendAddr: args[1]}
-			go proxy.Run()
-		}
+func RunTPortProxy(rule string) {
 
+	args := strings.Split(rule, "->")
+	if len(args) == 2 {
+		proxy := TCPProxy{bindAddr: args[0], backendAddr: args[1]}
+		go proxy.Run()
 	}
 
 }

@@ -177,14 +177,12 @@ func forward(addr *net.UDPAddr, buffer []byte, n int, backendAddr string) {
 
 }
 
-func RunUPortProxy(rules []string) {
-	for _, rule := range rules {
-		args := strings.Split(rule, "->")
-		if len(args) == 2 {
-			proxy := UDPProxy{bindAddr: args[0], backendAddr: args[1]}
-			go proxy.Run()
-		}
+func RunUPortProxy(rule string) {
 
+	args := strings.Split(rule, "->")
+	if len(args) == 2 {
+		proxy := UDPProxy{bindAddr: args[0], backendAddr: args[1]}
+		go proxy.Run()
 	}
 
 }

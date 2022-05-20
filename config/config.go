@@ -8,7 +8,6 @@ import (
 )
 
 type Config struct {
-	Protocol      string   `yaml:"protocol"`
 	Shadow        string   `yaml:"shadow"`
 	LogLevel      int      `yaml:"loglevel"`
 	Password      string   `yaml:"password"`
@@ -41,7 +40,6 @@ func InitConfig() {
 func GenEmptyConfig() {
 
 	ShadowProxyConfig = Config{
-		Protocol:      "tcp",
 		Shadow:        "auth",
 		LogLevel:      0,
 		Password:      cryptotools.Hash_MD5("admin"),
