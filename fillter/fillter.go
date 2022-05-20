@@ -99,4 +99,7 @@ func InitFillter() {
 	for _, v := range config.ShadowProxyConfig.WhiteList {
 		AppendWhiteList(v)
 	}
+	for _, v := range config.ShadowProxyConfig.BlackList {
+		AppendBlackList(v)
+	}
 }
