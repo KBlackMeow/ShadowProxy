@@ -138,9 +138,16 @@ func (service AuthService) Contraller() {
 func (service AuthService) Run() {
 
 	logger.Log("Auth Service Starting...")
-	err := http.ListenAndServe(service.serviceAddr, nil)
-	if err != nil {
-		logger.Error(err)
+	if config.ShadowProxyConfig.AuthSSL {
+		err := http.ListenAndServeTLS(service.serviceAddr, "server.crt", "server.key", nil)
+		if err != nil {
+			logger.Error(err)
+		}
+	} else {
+		err := http.ListenAndServe(service.serviceAddr, nil)
+		if err != nil {
+			logger.Error(err)
+		}
 	}
 
 }

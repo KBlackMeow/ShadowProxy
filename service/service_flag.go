@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"net/http"
+	"shadowproxy/config"
 	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
 )
@@ -22,9 +23,17 @@ func (service FlagService) Run() {
 	logger.Log("Flag Service Starting...")
 	mux := http.NewServeMux()
 	mux.HandleFunc("/flag", service.flag)
-	err := http.ListenAndServe(service.serviceAddr, mux)
-	if err != nil {
-		logger.Error(err)
+
+	if config.ShadowProxyConfig.AuthSSL {
+		err := http.ListenAndServeTLS(service.serviceAddr, "server.crt", "server.key", mux)
+		if err != nil {
+			logger.Error(err)
+		}
+	} else {
+		err := http.ListenAndServe(service.serviceAddr, mux)
+		if err != nil {
+			logger.Error(err)
+		}
 	}
 
 }
