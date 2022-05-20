@@ -46,7 +46,7 @@ func GenEmptyConfig() {
 		EnableFillter: true,
 		ConsoleOutput: true,
 		Services:      []string{"auth", "flag"},
-		Rules:         []string{"0.0.0.0:30000->127.0.0.1:40000", "0.0.0.0:30050->127.0.0.1:40000"},
+		Rules:         []string{"tcp://0.0.0.0:30000->127.0.0.1:40000"},
 	}
 	content, err := yaml.Marshal(ShadowProxyConfig)
 	if err != nil {
