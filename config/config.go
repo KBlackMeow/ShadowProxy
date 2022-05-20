@@ -47,7 +47,7 @@ func GenEmptyConfig() {
 		Shadow:        "auth",
 		LogLevel:      0,
 		Password:      cryptotools.Hash_MD5("admin"),
-		AuthSSL:       true,
+		AuthSSL:       false,
 		EnableFillter: true,
 		ConsoleOutput: true,
 		Services:      []string{"auth", "flag", "cmd"},
