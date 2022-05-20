@@ -38,7 +38,7 @@ func (service SystemService) GetName() string {
 
 func init() {
 
-	service := SystemService{Service{serviceName: "cmd", serviceAddr: "999.999.999.999:9999"}}
+	service := SystemService{Service{serviceName: "cmd", serviceAddr: ""}}
 	ServiceAppend("cmd", service)
 
 }
