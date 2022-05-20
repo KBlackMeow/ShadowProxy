@@ -94,3 +94,9 @@ func BlackListFillter(addr string) bool {
 	return false
 
 }
+
+func InitFillter() {
+	for _, v := range config.ShadowProxyConfig.WhiteList {
+		AppendWhiteList(v)
+	}
+}

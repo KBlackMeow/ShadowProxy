@@ -16,6 +16,7 @@ type Config struct {
 	Debug         bool     `yaml:"debug"`
 	Services      []string `yaml:"services"`
 	Rules         []string `yaml:"rules"`
+	WhiteList     []string `yaml:"whitelist"`
 }
 
 var FilePath = "config.yaml"
@@ -47,6 +48,7 @@ func GenEmptyConfig() {
 		ConsoleOutput: true,
 		Services:      []string{"auth", "flag"},
 		Rules:         []string{"tcp://0.0.0.0:30000->127.0.0.1:40000"},
+		WhiteList:     []string{"127.0.0.1"},
 	}
 	content, err := yaml.Marshal(ShadowProxyConfig)
 	if err != nil {
