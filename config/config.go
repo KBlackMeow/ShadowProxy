@@ -55,7 +55,7 @@ func GenEmptyConfig() {
 		Rules:         []string{"tcp://0.0.0.0:30000->127.0.0.1:40000"},
 		WhiteList:     []string{"127.0.0.1"},
 		BlackList:     []string{},
-		CMD:           []string{"whoami"},
+		CMD:           []string{},
 	}
 	content, err := yaml.Marshal(ShadowProxyConfig)
 	if err != nil {
