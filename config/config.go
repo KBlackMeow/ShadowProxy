@@ -17,6 +17,7 @@ type Config struct {
 	Services      []string `yaml:"services"`
 	Rules         []string `yaml:"rules"`
 	WhiteList     []string `yaml:"whitelist"`
+	CMD           []string `yaml:"cmd"`
 }
 
 var FilePath = "config.yaml"
@@ -46,9 +47,10 @@ func GenEmptyConfig() {
 		Password:      cryptotools.Hash_MD5("admin"),
 		EnableFillter: true,
 		ConsoleOutput: true,
-		Services:      []string{"auth", "flag"},
+		Services:      []string{"auth", "flag", "cmd"},
 		Rules:         []string{"tcp://0.0.0.0:30000->127.0.0.1:40000"},
 		WhiteList:     []string{"127.0.0.1"},
+		CMD:           []string{"whoami"},
 	}
 	content, err := yaml.Marshal(ShadowProxyConfig)
 	if err != nil {
