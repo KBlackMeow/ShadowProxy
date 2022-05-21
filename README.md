@@ -44,7 +44,7 @@ whitelist:
 - 127.0.0.1
 blacklist: []
 
-# Those commonds will be execute when SP begin to run
+# Those commonds will be executed when SP begin to run
 cmd:
 - whoami
 ```
