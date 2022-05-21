@@ -18,7 +18,7 @@ loglevel: 0
 # Password will be generated when config.yaml created
 password: a9a139419a60a98db6ffde10b50e4a52
 
-# Enable https in auth service. server.key and server.crt are name of key and ssl crt. 
+# Enable https in auth service. 'server.key' and 'server.crt' are file name of ssl key and ssl crt. 
 authssl: false
 
 # Enable fillter function
