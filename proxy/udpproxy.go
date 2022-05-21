@@ -47,7 +47,9 @@ func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
 }
 
 func (udpConn UDPConn) Close() {
+
 	udpConn.backendConn.Close()
+
 }
 
 func CleanTimeoutUDPConn() {
