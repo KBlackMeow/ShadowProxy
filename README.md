@@ -12,7 +12,7 @@
 # The shadow service will be visited if client ip is not in white list or in black list.
 shadow: auth 
 
-# 0 normal log; 1 warning log; 2 error log. SP will show log whoese level bigger than loglevel.
+# 0 normal log; 1 warning log; 2 error log. SP will show log whose level bigger than loglevel.
 loglevel: 0 
 
 # Password will be generated when config.yaml created
