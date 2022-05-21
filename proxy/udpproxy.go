@@ -13,11 +13,11 @@ import (
 // UDP Port Proxy
 
 type UDPConn struct {
-	Addr       *net.UDPAddr
-	remoteConn net.Conn
-	localConn  *net.UDPConn
-	TTL        int64
-	RecvTime   time.Time
+	Addr         *net.UDPAddr
+	backendConn  net.Conn
+	listenerConn *net.UDPConn
+	TTL          int64
+	RecvTime     time.Time
 }
 
 var UDPConns = map[string]*UDPConn{}
@@ -42,8 +42,12 @@ func GetUDPConn(addr string) (*UDPConn, bool) {
 
 func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
 
-	return udpConn.localConn.WriteToUDP(buff[:n], udpConn.Addr)
+	return udpConn.listenerConn.WriteToUDP(buff[:n], udpConn.Addr)
 
+}
+
+func (udpConn UDPConn) Close() {
+	udpConn.backendConn.Close()
 }
 
 func CleanTimeoutUDPConn() {
@@ -51,7 +55,7 @@ func CleanTimeoutUDPConn() {
 	for {
 		for k, v := range UDPConns {
 			if time.Now().Sub(v.RecvTime).Milliseconds() > v.TTL {
-				v.remoteConn.Close()
+				v.Close()
 				delete(UDPConns, k)
 			}
 		}
@@ -64,18 +68,19 @@ func CleanTimeoutUDPConn() {
 func CleanAllUDPConn() {
 
 	for k, v := range UDPConns {
-		v.remoteConn.Close()
+		v.Close()
 		delete(UDPConns, k)
 	}
 
 }
 
-type UDPProxy struct {
+type UDProxy struct {
 	bindAddr    string
 	backendAddr string
+	listener    *net.UDPConn
 }
 
-func (proxy UDPProxy) Run() {
+func (proxy UDProxy) Run() {
 
 	udpLAddr, _ := net.ResolveUDPAddr("udp4", proxy.bindAddr)
 	listener, err := net.ListenUDP("udp4", udpLAddr)
@@ -88,10 +93,15 @@ func (proxy UDPProxy) Run() {
 
 	defer listener.Close()
 	logger.Log("UDP", proxy.bindAddr, "udp-proxy started.")
+	proxy.listener = listener
+	proxy.forword()
+
+}
+func (proxy UDProxy) forword() {
 
 	for {
 		buffer := make([]byte, 4096)
-		n1, addr, err := listener.ReadFromUDP(buffer)
+		n1, addr, err := proxy.listener.ReadFromUDP(buffer)
 
 		if err != nil {
 			logger.Error("UDP", err)
@@ -104,83 +114,86 @@ func (proxy UDPProxy) Run() {
 		if !ok {
 			if fillter.Fillter(addr.String()) {
 				logger.Warn("UDP", addr.String(), "Alice is filtrated")
+				continue
 			} else {
 				ids.CheckIP(addr.String())
-				go forward(listener, addr, buffer, n1, proxy.backendAddr)
+				udpConn = link(proxy.listener, addr, proxy.backendAddr)
 			}
-			continue
+
 		}
 
 		ids.PackageLengthRecorder(addr.String(), n1)
-		n2, err := UDPConns[addr.String()].remoteConn.Write(buffer[:n1])
+		n2, err := udpConn.backendConn.Write(buffer[:n1])
 
 		if err != nil {
 			logger.Error("UDP", err)
-			UDPConns[addr.String()].remoteConn.Close()
+			UDPConns[addr.String()].backendConn.Close()
 			delete(UDPConns, addr.String())
 			continue
 		}
 
-		logger.Log("UDP", addr.String(), "->", udpConn.remoteConn.RemoteAddr().String(), n2, "Bytes")
+		logger.Log("UDP", addr.String(), "->", udpConn.backendConn.RemoteAddr().String(), n2, "Bytes")
 		UDPConns[addr.String()].RecvTime = time.Now()
 	}
-
 }
 
-func forward(listener *net.UDPConn, addr *net.UDPAddr, buffer []byte, n int, backendAddr string) {
+func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *UDPConn {
 
 	logger.Log("UDP", addr.String(), "Alice connected.")
 	backend, err := net.Dial("udp", backendAddr)
 	if err != nil {
 		logger.Error("UDP", err)
-		return
+		return nil
 	}
-	defer backend.Close()
+	// defer backend.Close()
 
 	logger.Log("UDP", backendAddr, "Bob connected.")
+
 	udpConn := new(UDPConn)
 	udpConn.Addr = addr
-	udpConn.remoteConn = backend
+	udpConn.backendConn = backend
 	udpConn.TTL = 10000
 	udpConn.RecvTime = time.Now()
-	udpConn.localConn = listener
+	udpConn.listenerConn = listener
+
 	SetUDPConn(addr.String(), udpConn)
 	SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
 
-	n2, err := backend.Write(buffer[:n])
-	if err != nil {
-		logger.Error("UDP", err)
-		return
-	}
+	go udpConn.back()
+	return udpConn
 
-	logger.Log("UDP", addr.String(), "->", backendAddr, n2, "Bytes")
+}
 
+func (udpConn *UDPConn) back() {
+	from := udpConn.backendConn
+	to := udpConn
 	for {
 		buffer := make([]byte, 4096)
-		n1, err := backend.Read(buffer)
+		n1, err := from.Read(buffer)
 
 		if err != nil {
 			logger.Error("UDP", err)
+			udpConn.Close()
 			return
 		}
 
-		n2, err := udpConn.WriteToUDP(buffer, n1)
+		n2, err := to.WriteToUDP(buffer, n1)
 		if err != nil {
 			logger.Error("UDP", err)
+			udpConn.Close()
 			return
 		}
 
-		logger.Log("UDP", backendAddr, "->", addr.String(), n2, "Bytes")
-		udpConn.RecvTime = time.Now()
+		logger.Log("UDP", from.RemoteAddr().String(), "->", to.Addr.String(), n2, "Bytes")
+		to.RecvTime = time.Now()
 	}
-
 }
 
 func RunUPortProxy(rule string) {
 
 	args := strings.Split(rule, "->")
 	if len(args) == 2 {
-		proxy := UDPProxy{bindAddr: args[0], backendAddr: args[1]}
+		proxy := UDProxy{bindAddr: args[0], backendAddr: args[1]}
 		go proxy.Run()
 	}
 
