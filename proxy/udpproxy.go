@@ -15,11 +15,11 @@ import (
 type UDPConn struct {
 	Addr       *net.UDPAddr
 	remoteConn net.Conn
+	localConn  *net.UDPConn
 	TTL        int64
 	RecvTime   time.Time
 }
 
-var Sender net.UDPConn
 var UDPConns = map[string]*UDPConn{}
 var UDPMutex = new(sync.Mutex)
 
@@ -42,7 +42,7 @@ func GetUDPConn(addr string) (*UDPConn, bool) {
 
 func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
 
-	return Sender.WriteToUDP(buff[:n], udpConn.Addr)
+	return udpConn.localConn.WriteToUDP(buff[:n], udpConn.Addr)
 
 }
 
@@ -86,7 +86,6 @@ func (proxy UDPProxy) Run() {
 		return
 	}
 
-	Sender = *listener
 	defer listener.Close()
 	logger.Log("UDP", proxy.bindAddr, "udp-proxy started.")
 
@@ -107,7 +106,7 @@ func (proxy UDPProxy) Run() {
 				logger.Warn("UDP", addr.String(), "Alice is filtrated")
 			} else {
 				ids.CheckIP(addr.String())
-				go forward(addr, buffer, n1, proxy.backendAddr)
+				go forward(listener, addr, buffer, n1, proxy.backendAddr)
 			}
 			continue
 		}
@@ -128,7 +127,7 @@ func (proxy UDPProxy) Run() {
 
 }
 
-func forward(addr *net.UDPAddr, buffer []byte, n int, backendAddr string) {
+func forward(listener *net.UDPConn, addr *net.UDPAddr, buffer []byte, n int, backendAddr string) {
 
 	logger.Log("UDP", addr.String(), "Alice connected.")
 	backend, err := net.Dial("udp", backendAddr)
@@ -144,7 +143,7 @@ func forward(addr *net.UDPAddr, buffer []byte, n int, backendAddr string) {
 	udpConn.remoteConn = backend
 	udpConn.TTL = 10000
 	udpConn.RecvTime = time.Now()
-
+	udpConn.localConn = listener
 	SetUDPConn(addr.String(), udpConn)
 	SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
 
