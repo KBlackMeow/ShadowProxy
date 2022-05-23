@@ -23,10 +23,9 @@
                     encrypt.setPublicKey(pubkey);
                     
                     var password = document.getElementById("password").value
-                    // let cpwd = encrypt.encrypt(password.value)
 
                     var time = String(Date.now())
-                    // let time = encrypt.encrypt(time)
+        
                     let token = "{{.Token}}"
 
                     let msg = password+"#"+time+"#"+token
