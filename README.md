@@ -31,8 +31,8 @@ debug: false
 
 # Those services will be run background. You can ban some service by delete it from array
 services:
-- auth
-- flag
+- auth # 127.0.0.1:57575
+- flag # 127.0.0.1:40000
 - cmd
 
 # Port proxy rules, tcp/udp://bind address->backend address
