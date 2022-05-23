@@ -1,5 +1,5 @@
 # ShadowProxy v0.1.0
-## What is ShadowProxy tool.
+## What is ShadowProxy.
 > The SP (ShadowProxy) was designed to protect your services from Port Scaning Attacks and Replay Attacks. It will hide your real service in your servers and send attackers facker informations.
 ## 
 > The project is still at an early stage, so there are some bugs in the stage and those bugs are not fixed in time.
