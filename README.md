@@ -1,8 +1,10 @@
 # ShadowProxy v0.1.0
 ## What is ShadowProxy tool.
 > The SP (ShadowProxy) was designed to protect your services from Port Scaning Attacks and Replay Attacks. It will hide your real service in your servers and send attackers facker informations.
+## 
+> The project is still at an early stage, so there are some bugs in the stage and those bugs are not fixed in time.
 ## How to start 
-> Run "go build" and you will get 'shadowproxy'
+> Run "go build" and you will get 'shadowproxy',and template and static must be together with binary file.
 
 > When first run ./shadowproxy, it will generate a yaml config file named 'config.yaml', then the SP will read those configs to program.
 
