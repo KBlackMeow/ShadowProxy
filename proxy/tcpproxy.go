@@ -135,6 +135,7 @@ func proxy(from net.Conn, to net.Conn, closed chan bool, RTL bool) {
 
 		if RTL {
 			ids.PackageLengthRecorder(from.RemoteAddr().String(), n1)
+		} else {
 		}
 
 		n2, err := to.Write(buffer[:n1])
