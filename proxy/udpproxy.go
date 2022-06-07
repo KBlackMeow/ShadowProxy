@@ -41,15 +41,15 @@ func GetUDPConn(addr string) (*UDPConn, bool) {
 
 }
 
-func (udpConn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
+func (conn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
 
-	return udpConn.listenerConn.WriteToUDP(buff[:n], udpConn.Addr)
+	return conn.listenerConn.WriteToUDP(buff[:n], conn.Addr)
 
 }
 
-func (udpConn UDPConn) Close() {
+func (conn UDPConn) Close() {
 
-	udpConn.backendConn.Close()
+	conn.backendConn.Close()
 
 }
 
