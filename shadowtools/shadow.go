@@ -35,6 +35,7 @@ func InitShadowService() {
 }
 
 func GetShadowAddr(remoteAddr string) string {
+
 	port, err := strconv.ParseInt(strings.Split(remoteAddr, ":")[1], 10, 32)
 
 	if err != nil {
