@@ -5,6 +5,7 @@ import (
 	"shadowproxy/fillter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
+	"shadowproxy/transform"
 	"strings"
 	"sync"
 	"time"
@@ -159,7 +160,7 @@ func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *UDPConn
 	udpConn.listenerConn = listener
 
 	SetUDPConn(addr.String(), udpConn)
-	SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
+	transform.SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
 
 	go udpConn.back()
 	return udpConn

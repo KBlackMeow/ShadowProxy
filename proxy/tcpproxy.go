@@ -5,12 +5,12 @@ import (
 	"shadowproxy/fillter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
+	"shadowproxy/shadowtools"
+	"shadowproxy/transform"
 	"strings"
 	"sync"
 	"time"
 )
-
-var ShadowAddr = ""
 
 type IPConns struct {
 	IP    string
@@ -78,9 +78,12 @@ func (proxy TCPProxy) Run() {
 			return
 		}
 		ids.CheckIP(conn.RemoteAddr().String())
+
+		shadowAddr := shadowtools.GetShadowAddr(conn.RemoteAddr().String())
+
 		if fillter.Fillter(conn.RemoteAddr().String()) {
-			logger.Warn("TCP", conn.RemoteAddr().String(), "Alice is filtrated", "Shadow is", ShadowAddr)
-			go handler(conn, ShadowAddr)
+			logger.Warn("TCP", conn.RemoteAddr().String(), "Alice is filtrated", "Shadow is", shadowAddr)
+			go handler(conn, shadowAddr)
 
 		} else {
 			go handler(conn, proxy.backendAddr)
@@ -106,7 +109,7 @@ func handler(conn net.Conn, backendAddr string) {
 	}
 	defer backend.Close()
 
-	SetRAddrToLAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
+	transform.SetRAddrToLAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
 	AddConnToIP(backend, conn.RemoteAddr().String())
 	logger.Log("TCP", backendAddr, "Bob connected.")
 
@@ -115,7 +118,8 @@ func handler(conn net.Conn, backendAddr string) {
 	go proxy(backend, conn, closed, false)
 	<-closed
 
-	delete(LAddrToRAddr, backend.LocalAddr().String())
+	transform.DeleteAddr(backend.LocalAddr().String())
+
 	delete(IPToConns, conn.RemoteAddr().String())
 
 	logger.Log("TCP", conn.RemoteAddr().String(), "Alice connection is closed.")

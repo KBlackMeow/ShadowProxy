@@ -14,7 +14,7 @@ type Config struct {
 	EnableFillter bool     `yaml:"enablefillter"`
 	ConsoleOutput bool     `yaml:"consoleoutput"`
 	Debug         bool     `yaml:"debug"`
-	Shadow        string   `yaml:"shadow"`
+	Shadows       []string `yaml:"shadow"`
 	Services      []string `yaml:"services"`
 	Rules         []string `yaml:"rules"`
 	WhiteList     []string `yaml:"whitelist"`
@@ -50,7 +50,7 @@ func GenEmptyConfig() {
 		AuthSSL:       false,
 		EnableFillter: true,
 		ConsoleOutput: true,
-		Shadow:        "auth",
+		Shadows:       []string{"auth"},
 		Services:      []string{"auth", "flag", "cmd"},
 		Rules:         []string{"tcp://0.0.0.0:30000->127.0.0.1:40000"},
 		WhiteList:     []string{"127.0.0.1"},

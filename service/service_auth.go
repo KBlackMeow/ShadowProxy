@@ -10,6 +10,7 @@ import (
 	"shadowproxy/fillter"
 	"shadowproxy/logger"
 	"shadowproxy/proxy"
+	"shadowproxy/transform"
 	"strconv"
 	"strings"
 	"time"
@@ -30,7 +31,7 @@ type UserInfo struct {
 
 func (service AuthService) token(remoteAddr string) string {
 
-	remoteAddr, ok := proxy.GetRAddrFromLAddr(remoteAddr)
+	remoteAddr, ok := transform.GetRAddrFromLAddr(remoteAddr)
 	if ok {
 		return cryptotools.Hash_SHA512(remoteAddr)
 	}
@@ -49,7 +50,7 @@ func (service Service) verifyToken(remoteAddr string, token string) bool {
 
 func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
-	remoteAddr, ok := proxy.GetRAddrFromLAddr(r.RemoteAddr)
+	remoteAddr, ok := transform.GetRAddrFromLAddr(r.RemoteAddr)
 
 	if ok {
 		var loginfo LoginInfo
