@@ -152,18 +152,18 @@ func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *UDPConn
 
 	logger.Log("UDP", backendAddr, "Bob connected.")
 
-	udpConn := new(UDPConn)
-	udpConn.Addr = addr
-	udpConn.backendConn = backend
-	udpConn.TTL = 10000
-	udpConn.RecvTime = time.Now()
-	udpConn.listenerConn = listener
+	conn := new(UDPConn)
+	conn.Addr = addr
+	conn.backendConn = backend
+	conn.TTL = 10000
+	conn.RecvTime = time.Now()
+	conn.listenerConn = listener
 
-	SetUDPConn(addr.String(), udpConn)
+	SetUDPConn(addr.String(), conn)
 	transform.SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
 
-	go udpConn.back()
-	return udpConn
+	go conn.back()
+	return conn
 
 }
 
