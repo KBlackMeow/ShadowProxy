@@ -11,10 +11,11 @@ import (
 )
 
 func init() {
-	config.InitConfig()
+
 }
 
 func ComponentInit() {
+	config.InitConfig()
 	service.InitServices()
 	shadowtools.InitShadowService()
 	fillter.InitFillter()
