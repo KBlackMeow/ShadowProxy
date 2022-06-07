@@ -14,7 +14,7 @@ type Config struct {
 	EnableFillter bool     `yaml:"enablefillter"`
 	ConsoleOutput bool     `yaml:"consoleoutput"`
 	Debug         bool     `yaml:"debug"`
-	Shadows       []string `yaml:"shadow"`
+	Shadows       []string `yaml:"shadows"`
 	Services      []string `yaml:"services"`
 	Rules         []string `yaml:"rules"`
 	WhiteList     []string `yaml:"whitelist"`

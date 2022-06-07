@@ -11,9 +11,6 @@
 ## ShadowProxy Config Introduction
 
 ```
-# The shadow service will be visited if client ip is not in white list or in black list.
-shadow: auth 
-
 # 0 normal log; 1 warning log; 2 error log. SP will show log whose level is bigger than loglevel.
 loglevel: 0 
 
@@ -30,6 +27,10 @@ enablefillter: true
 consoleoutput: true
 
 debug: false
+
+# The shadow service will be visited if client ip is not in white list or in black list.
+shadows: 
+- auth 
 
 # Those services will be run background. You can ban some service by delete it from array
 services:
