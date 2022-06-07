@@ -167,23 +167,23 @@ func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *UDPConn
 
 }
 
-func (udpConn *UDPConn) back() {
-	from := udpConn.backendConn
-	to := udpConn
+func (conn *UDPConn) back() {
+	from := conn.backendConn
+	to := conn
 	for {
 		buffer := make([]byte, 4096)
 		n1, err := from.Read(buffer)
 
 		if err != nil {
 			logger.Error("UDP", err)
-			udpConn.Close()
+			conn.Close()
 			return
 		}
 
 		n2, err := to.WriteToUDP(buffer, n1)
 		if err != nil {
 			logger.Error("UDP", err)
-			udpConn.Close()
+			conn.Close()
 			return
 		}
 
