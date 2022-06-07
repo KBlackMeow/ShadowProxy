@@ -35,7 +35,7 @@ func AddConnToIP(conn net.Conn, addr string) {
 
 }
 
-func TimeoutCloseConn(addr string, dely uint64) {
+func TimeoutToClearConnFromIP(addr string, dely uint64) {
 
 	ip := strings.Split(addr, ":")[0]
 	time.Sleep(time.Duration(dely) * time.Millisecond)
