@@ -68,7 +68,7 @@ func UDPConnClear() {
 
 }
 
-func CleanAllUDPConn() {
+func AllUDPConnClear() {
 
 	for k, v := range UDPConns {
 		v.Close()
