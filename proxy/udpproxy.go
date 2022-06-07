@@ -53,7 +53,7 @@ func (udpConn UDPConn) Close() {
 
 }
 
-func UDPConnCollect() {
+func UDPConnClear() {
 
 	for {
 		for k, v := range UDPConns {
@@ -204,6 +204,6 @@ func RunUPortProxy(rule string) {
 
 func init() {
 
-	go UDPConnCollect()
+	go UDPConnClear()
 
 }
