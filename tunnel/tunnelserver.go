@@ -35,7 +35,7 @@ func (server TunServer) Run() {
 
 		// logger.Log("tunnel server", pkg)
 
-		if pkg.flag == 0 {
+		if pkg.flag == 1 {
 			byts, n := pkg.toBytes()
 			listener.WriteToUDP(byts[:n], addr)
 

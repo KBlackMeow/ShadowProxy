@@ -41,9 +41,9 @@ func GetUDPConn(addr string) (*UDPConn, bool) {
 
 }
 
-func (conn UDPConn) WriteToUDP(buff []byte, n int) (int, error) {
+func (conn UDPConn) Write(buff []byte) (int, error) {
 
-	return conn.listenerConn.WriteToUDP(buff[:n], conn.Addr)
+	return conn.listenerConn.WriteToUDP(buff, conn.Addr)
 
 }
 
@@ -180,7 +180,7 @@ func (conn *UDPConn) back() {
 			return
 		}
 
-		n2, err := to.WriteToUDP(buffer, n1)
+		n2, err := to.Write(buffer[:n1])
 		if err != nil {
 			logger.Error("UDP", err)
 			conn.Close()

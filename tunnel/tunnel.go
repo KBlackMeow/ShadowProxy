@@ -3,6 +3,8 @@ package tunnel
 import (
 	"bytes"
 	"encoding/binary"
+	"net"
+	"shadowproxy/logger"
 	"time"
 )
 
@@ -40,7 +42,48 @@ func GetTunPkgFromBytes(msg []byte, n int) *TunPkg {
 type Tunnel struct {
 	server string
 	client string
+	src    uint16
+	dst    uint16
+	flag   uint16
 	key    string
+	conn   net.Conn
+}
+
+func (tun Tunnel) connect() {
+
+	server, err := net.Dial("udp", tun.server)
+	if err != nil {
+		logger.Error("UDP", err)
+		return
+	}
+	defer server.Close()
+
+	pkg := TunPkg{src: tun.src, dst: tun.dst, flag: tun.flag, pkg: []byte{}}
+	byts, _ := pkg.toBytes()
+
+	_, e1 := server.Write(byts)
+	if e1 != nil {
+		logger.Error("Tunnel Client", e1)
+		return
+	}
+
+	buffer := make([]byte, 4096)
+	_, e2 := server.Read(buffer)
+	if e2 != nil {
+		logger.Error("Tunnel Client", e2)
+		return
+	}
+
+	tun.conn = server
+
+}
+
+func (tun Tunnel) Write(buff []byte, n int) (int, error) {
+	return tun.conn.Write(buff[:n])
+}
+
+func (tun Tunnel) Read(buff []byte) (int, error) {
+	return tun.Read(buff)
 }
 
 func Run() {
@@ -51,9 +94,9 @@ func Run() {
 
 	ser := TunServer{LocalAddr: "0.0.0.0:11111"}
 	go ser.Run()
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(500) * time.Millisecond)
 	cli := TunClient{RemoteAddr: "127.0.0.1:11111"}
 
-	cli.Link(2222, 3333)
+	cli.Link(2222, 3333, 1)
 
 }
