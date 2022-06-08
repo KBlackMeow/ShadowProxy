@@ -49,10 +49,10 @@ func Run() {
 	// byts, n := x.toBytes()
 	// fmt.Println(GetTunPkgFromBytes(byts, n))
 
-	ser := TunServer{listener: "0.0.0.0:11111"}
+	ser := TunServer{LocalAddr: "0.0.0.0:11111"}
 	go ser.Run()
 	time.Sleep(time.Duration(100) * time.Millisecond)
-	cli := TunClient{server: "127.0.0.1:11111"}
+	cli := TunClient{RemoteAddr: "127.0.0.1:11111"}
 
 	cli.Link(2222, 3333)
 

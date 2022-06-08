@@ -6,11 +6,11 @@ import (
 )
 
 type TunServer struct {
-	listener string
+	LocalAddr string
 }
 
 func (server TunServer) Run() {
-	addr, _ := net.ResolveUDPAddr("udp4", server.listener)
+	addr, _ := net.ResolveUDPAddr("udp4", server.LocalAddr)
 	listener, err := net.ListenUDP("udp4", addr)
 
 	if err != nil {
@@ -19,7 +19,7 @@ func (server TunServer) Run() {
 	}
 
 	defer listener.Close()
-	logger.Log("Tunnel Server", server.listener, "tunnel server started.")
+	logger.Log("Tunnel Server", server.LocalAddr, "tunnel server started.")
 
 	for {
 
@@ -36,7 +36,7 @@ func (server TunServer) Run() {
 		// logger.Log("tunnel server", pkg)
 
 		if pkg.flag == 0 {
-			tun := Tunnel{server: server.listener, client: addr.String(), key: "123456"}
+			tun := Tunnel{server: server.LocalAddr, client: addr.String(), key: "123456"}
 			logger.Log("Tunnel Server", tun)
 		}
 

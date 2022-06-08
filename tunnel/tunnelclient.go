@@ -6,11 +6,11 @@ import (
 )
 
 type TunClient struct {
-	server string
+	RemoteAddr string
 }
 
 func (client TunClient) Link(src uint16, dst uint16) {
-	server, err := net.Dial("udp", client.server)
+	server, err := net.Dial("udp", client.RemoteAddr)
 	if err != nil {
 		logger.Error("UDP", err)
 		return
@@ -24,6 +24,11 @@ func (client TunClient) Link(src uint16, dst uint16) {
 
 	if e != nil {
 		logger.Error(e)
+		return
 	}
+
+	tun := Tunnel{server: server.RemoteAddr().String(), client: server.LocalAddr().String(), key: "123456"}
+
+	logger.Log("Tunnel Client", tun)
 
 }
