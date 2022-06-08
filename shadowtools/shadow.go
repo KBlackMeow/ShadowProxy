@@ -33,7 +33,7 @@ func InitShadowService() {
 
 }
 
-func GetShadowAddr(remoteAddr string) string {
+func GetShadowAddr() string {
 
 	return ShadowAddr
 }

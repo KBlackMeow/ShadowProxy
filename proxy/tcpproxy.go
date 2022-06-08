@@ -79,7 +79,7 @@ func (proxy TCPProxy) Run() {
 		}
 		ids.CheckIP(conn.RemoteAddr().String())
 
-		shadowAddr := shadowtools.GetShadowAddr(conn.RemoteAddr().String())
+		shadowAddr := shadowtools.GetShadowAddr()
 
 		if fillter.Fillter(conn.RemoteAddr().String()) {
 			logger.Warn("TCP", conn.RemoteAddr().String(), "Alice is filtrated", "Shadow is", shadowAddr)
