@@ -8,14 +8,16 @@ import (
 	"shadowproxy/proxy"
 	"shadowproxy/service"
 	"shadowproxy/shadowtools"
+	"shadowproxy/tunnel"
 )
 
 func init() {
-
+	config.InitConfig()
+	tunnel.Run()
 }
 
 func ComponentInit() {
-	config.InitConfig()
+
 	service.InitServices()
 	shadowtools.InitShadowService()
 	fillter.InitFillter()
