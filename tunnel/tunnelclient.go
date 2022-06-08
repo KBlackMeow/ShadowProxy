@@ -20,15 +20,21 @@ func (client TunClient) Link(src uint16, dst uint16) {
 	pkg := TunPkg{src: uint16(src), dst: uint16(dst), flag: 0, pkg: []byte{}}
 	byts, _ := pkg.toBytes()
 
-	_, e := server.Write(byts)
-
-	if e != nil {
-		logger.Error(e)
+	_, e1 := server.Write(byts)
+	if e1 != nil {
+		logger.Error("Tunnel Client", e1)
 		return
 	}
 
-	tun := Tunnel{server: server.RemoteAddr().String(), client: server.LocalAddr().String(), key: "123456"}
-
-	logger.Log("Tunnel Client", tun)
+	buffer := make([]byte, 4096)
+	n, e2 := server.Read(buffer)
+	if e2 != nil {
+		logger.Error("Tunnel Client", e2)
+		return
+	}
+	if GetTunPkgFromBytes(buffer, n).flag == 0 {
+		tun := Tunnel{server: server.RemoteAddr().String(), client: server.LocalAddr().String(), key: "123456"}
+		logger.Log("Tunnel Client", tun)
+	}
 
 }
