@@ -92,7 +92,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 			res, _ := json.Marshal(&userinfo)
 			fmt.Fprintf(w, string(res))
 
-			go proxy.ClearConnFromIP(remoteAddr, 2000)
+			go proxy.ClearConnFromIP(remoteAddr)
 			return
 		}
 

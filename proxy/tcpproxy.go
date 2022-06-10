@@ -9,7 +9,6 @@ import (
 	"shadowproxy/transform"
 	"strings"
 	"sync"
-	"time"
 )
 
 type IPConns struct {
@@ -35,10 +34,9 @@ func AddConnToIP(conn net.Conn, addr string) {
 
 }
 
-func ClearConnFromIP(addr string, dely uint64) {
+func ClearConnFromIP(addr string) {
 
 	ip := strings.Split(addr, ":")[0]
-	time.Sleep(time.Duration(dely) * time.Millisecond)
 	TCPMutex.Lock()
 	defer TCPMutex.Unlock()
 	ipConns, ok := IPToConns[ip]
