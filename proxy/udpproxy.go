@@ -160,7 +160,7 @@ func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *UDPConn
 	conn.listenerConn = listener
 
 	SetUDPConn(addr.String(), conn)
-	transform.SetRAddrToLAddr(backend.LocalAddr().String(), addr.String())
+	transform.SetRemoteAddrToLocalAddr(backend.LocalAddr().String(), addr.String())
 
 	go conn.back()
 	return conn

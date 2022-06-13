@@ -4,29 +4,29 @@ import "sync"
 
 var Mutex = new(sync.Mutex)
 
-var LAddrToRAddr = map[string]string{}
+var LocalAddrToRemoteAddr = map[string]string{}
 
-func GetRAddrFromLAddr(laddr string) (string, bool) {
+func GetRemoteAddrFromLocalAddr(laddr string) (string, bool) {
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
-	raddr, ok := LAddrToRAddr[laddr]
+	raddr, ok := LocalAddrToRemoteAddr[laddr]
 	return raddr, ok
 
 }
 
-func SetRAddrToLAddr(laddr string, raddr string) {
+func SetRemoteAddrToLocalAddr(laddr string, raddr string) {
 
 	Mutex.Lock()
 	defer Mutex.Unlock()
-	LAddrToRAddr[laddr] = raddr
+	LocalAddrToRemoteAddr[laddr] = raddr
 
 }
 
 func DeleteAddr(addr string) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
-	delete(LAddrToRAddr, addr)
+	delete(LocalAddrToRemoteAddr, addr)
 }
 
 var NameToAddr = map[string]string{}

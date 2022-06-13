@@ -107,7 +107,7 @@ func handler(conn net.Conn, backendAddr string) {
 	}
 	defer backend.Close()
 
-	transform.SetRAddrToLAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
+	transform.SetRemoteAddrToLocalAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
 	AddConnToIP(backend, conn.RemoteAddr().String())
 	logger.Log("TCP", backendAddr, "Bob connected.")
 

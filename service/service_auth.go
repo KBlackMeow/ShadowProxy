@@ -31,7 +31,7 @@ type UserInfo struct {
 
 func (service AuthService) token(remoteAddr string) string {
 
-	remoteAddr, ok := transform.GetRAddrFromLAddr(remoteAddr)
+	remoteAddr, ok := transform.GetRemoteAddrFromLocalAddr(remoteAddr)
 	if ok {
 		return cryptotools.Hash_SHA512(remoteAddr)
 	}
@@ -50,7 +50,7 @@ func (service Service) verifyToken(remoteAddr string, token string) bool {
 
 func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
-	remoteAddr, ok := transform.GetRAddrFromLAddr(r.RemoteAddr)
+	remoteAddr, ok := transform.GetRemoteAddrFromLocalAddr(r.RemoteAddr)
 
 	if ok {
 		var loginfo LoginInfo
