@@ -21,7 +21,7 @@ func Filter(addr string) bool {
 	var ret = false
 	ret = ret || WhiteListFilter(addr)
 	ret = ret || BlackListFilter(addr)
-	ret = ret && config.ShadowProxyConfig.EnableFillter
+	ret = ret && config.ShadowProxyConfig.EnableFilter
 	return ret
 
 }

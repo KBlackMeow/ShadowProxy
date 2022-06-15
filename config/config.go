@@ -11,7 +11,7 @@ type Config struct {
 	LogLevel      int      `yaml:"loglevel"`
 	Password      string   `yaml:"password"`
 	AuthSSL       bool     `yaml:"authssl"`
-	EnableFillter bool     `yaml:"enablefillter"`
+	EnableFilter  bool     `yaml:"enablefilter"`
 	ConsoleOutput bool     `yaml:"consoleoutput"`
 	Debug         bool     `yaml:"debug"`
 	Shadow        string   `yaml:"shadows"`
@@ -48,7 +48,7 @@ func GenEmptyConfig() {
 		LogLevel:      0,
 		Password:      cryptotools.Hash_MD5("admin"),
 		AuthSSL:       false,
-		EnableFillter: true,
+		EnableFilter:  true,
 		ConsoleOutput: true,
 		Shadow:        "auth",
 		Services:      []string{"auth", "flag", "cmd"},
