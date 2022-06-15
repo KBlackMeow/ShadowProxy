@@ -1,7 +1,7 @@
 package ids
 
 import (
-	"shadowproxy/fillter"
+	"shadowproxy/filter"
 	"strings"
 	"sync"
 	"time"
@@ -75,7 +75,7 @@ func CheckIP(addr string) {
 	guest.visited()
 
 	if guest.count() >= 5 {
-		fillter.AppendBlackList(addr)
+		filter.AppendBlackList(addr)
 	}
 
 }

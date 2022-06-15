@@ -4,7 +4,7 @@ import (
 	"flag"
 
 	"shadowproxy/config"
-	"shadowproxy/fillter"
+	"shadowproxy/filter"
 	"shadowproxy/proxy"
 	"shadowproxy/service"
 	"shadowproxy/shadowtools"
@@ -18,7 +18,7 @@ func ComponentInit() {
 
 	service.InitServices()
 	shadowtools.InitShadowService()
-	fillter.InitFillter()
+	filter.InitFilter()
 	proxy.RunProxy()
 }
 

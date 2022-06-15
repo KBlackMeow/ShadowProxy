@@ -2,7 +2,7 @@ package proxy
 
 import (
 	"net"
-	"shadowproxy/fillter"
+	"shadowproxy/filter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
 	"shadowproxy/shadowtools"
@@ -79,7 +79,7 @@ func (proxy TCPProxy) Run() {
 
 		shadowAddr := shadowtools.GetShadowAddr()
 
-		if fillter.Fillter(conn.RemoteAddr().String()) {
+		if filter.Filter(conn.RemoteAddr().String()) {
 			logger.Warn("TCP", conn.RemoteAddr().String(), "Alice is filtrated", "Shadow is", shadowAddr)
 			go handler(conn, shadowAddr)
 

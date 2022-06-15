@@ -2,7 +2,7 @@ package proxy
 
 import (
 	"net"
-	"shadowproxy/fillter"
+	"shadowproxy/filter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
 	"shadowproxy/transform"
@@ -115,7 +115,7 @@ func (proxy UDProxy) forword() {
 		udpConn, ok := GetUDPConn(addr.String())
 
 		if !ok {
-			if fillter.Fillter(addr.String()) {
+			if filter.Filter(addr.String()) {
 				logger.Warn("UDP", addr.String(), "Alice is filtrated")
 				continue
 			} else {
