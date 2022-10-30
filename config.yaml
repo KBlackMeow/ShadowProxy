@@ -1,0 +1,18 @@
+loglevel: 0
+password: b16b6937469cb5a78a67edd690c07879
+authssl: false
+enablefilter: true
+consoleoutput: true
+debug: false
+shadows: auth
+services:
+- auth
+- flag
+- cmd
+rules:
+- tcp://0.0.0.0:30000->127.0.0.1:40000
+- udp://0.0.0.0:30000->127.0.0.1:40000
+whitelist:
+- 127.0.0.1
+blacklist: []
+cmd: []
