@@ -41,10 +41,7 @@ func (service AuthService) token(remoteAddr string) string {
 
 func (service Service) verifyToken(remoteAddr string, token string) bool {
 
-	if token == cryptotools.Hash_SHA512(remoteAddr) {
-		return true
-	}
-	return false
+	return token == cryptotools.Hash_SHA512(remoteAddr)
 
 }
 
@@ -90,7 +87,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
 			userinfo := UserInfo{UserAddr: remoteAddr, UserLoginTime: logger.TimeNow()}
 			res, _ := json.Marshal(&userinfo)
-			fmt.Fprintf(w, string(res))
+			fmt.Fprint(w, string(res))
 
 			go proxy.ClearConnFromIP(remoteAddr)
 			return
@@ -108,7 +105,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(time.Duration(3000) * time.Millisecond)
 	userinfo := UserInfo{}
 	data, _ := json.Marshal(&userinfo)
-	fmt.Fprintf(w, string(data))
+	fmt.Fprint(w, string(data))
 
 }
 
