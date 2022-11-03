@@ -34,7 +34,7 @@ func AddConnToIP(conn net.Conn, addr string) {
 
 }
 
-func ClearConnFromIP(addr string) {
+func CloseConnFromIP(addr string) {
 
 	ip := strings.Split(addr, ":")[0]
 	TCPMutex.Lock()

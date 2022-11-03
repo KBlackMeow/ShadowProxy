@@ -89,8 +89,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 			res, _ := json.Marshal(&userinfo)
 			fmt.Fprint(w, string(res))
 
-			time.Sleep(time.Duration(3000) * time.Millisecond)
-			go proxy.ClearConnFromIP(remoteAddr)
+			go proxy.CloseConnFromIP(remoteAddr)
 			return
 		}
 
@@ -165,7 +164,7 @@ func (service AuthService) GetAddr() string {
 
 func init() {
 
-	service := AuthService{Service{serviceName: "auth", serviceAddr: "0.0.0.0:57575"}}
+	service := AuthService{Service{serviceName: "auth", serviceAddr: "127.0.0.1:57575"}}
 	service.Contraller()
 	ServiceAppend("auth", service)
 
