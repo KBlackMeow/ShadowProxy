@@ -57,7 +57,7 @@ func UDPConnClear() {
 
 	for {
 		for k, v := range UDPConns {
-			if time.Now().Sub(v.RecvTime).Milliseconds() > v.TTL {
+			if time.Since(v.RecvTime).Milliseconds() > v.TTL {
 				v.Close()
 				delete(UDPConns, k)
 			}
