@@ -4,7 +4,7 @@ authssl: false
 enablefilter: true
 consoleoutput: true
 debug: false
-shadows: auth
+shadows: 127.0.0.1:57575
 services:
 - auth
 - flag

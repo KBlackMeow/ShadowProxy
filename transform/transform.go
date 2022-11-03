@@ -28,5 +28,3 @@ func DeleteAddr(addr string) {
 	defer Mutex.Unlock()
 	delete(LocalAddrToRemoteAddr, addr)
 }
-
-var NameToAddr = map[string]string{}
