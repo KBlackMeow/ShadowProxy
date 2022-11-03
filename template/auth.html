@@ -1,7 +1,6 @@
 <html>
     <body>
         <script src='static/js/jsencrypt.js'></script>
-        <script src='static/js/jquery.js'></script>
         <body style='text-align:center;'>
             <div id='tab1'>
                 <input type='password' id='password'  name='password'/>
@@ -31,24 +30,22 @@
                     let msg = password+"#"+time+"#"+token
                     let cmsg = encrypt.encrypt(msg)
 
-                    $.ajax({
-                        type: "POST",
-                        url: "/verify",
-                        data: JSON.stringify({'cmsg':cmsg}),
-                        success: (e)=>{
-                            // console.log(e)
-                            if(e.UserAddr!=""){
-                                document.getElementById("UserAddr").innerText = e.UserAddr
-                                document.getElementById("LoginTime").innerText = e.UserLoginTime
-                                document.getElementById("tab1").hidden = true
-                                document.getElementById("tab2").hidden = false
-
-                            }else {
-                                alert("PASSWORD WRONG!!")
-                            }
-                        },
-                        dataType: 'json'
-                    });
+                    const xhr = new XMLHttpRequest()
+                    xhr.open('POST', '/verify', true)
+                    xhr.setRequestHeader('Content-type', 'application/json ')           
+                    xhr.onload = function () {
+                        res = JSON.parse(this.response)
+                        console.log(res)
+                        if(res.UserAddr!=""){
+                            document.getElementById("UserAddr").innerText = res.UserAddr
+                            document.getElementById("LoginTime").innerText = res.UserLoginTime
+                            document.getElementById("tab1").hidden = true
+                            document.getElementById("tab2").hidden = false
+                        }else {
+                            alert("PASSWORD WRONG!!")
+                        }
+                    }
+                    xhr.send(JSON.stringify({'cmsg':cmsg}))
 
                 }
 
