@@ -29,7 +29,7 @@ consoleoutput: true
 debug: false
 
 # The shadow service will be visited if client ip is not in white list or in black list.
-shadow: auth 
+shadow: 127.0.0.1:57575
 
 # Those services will be run background. You can ban some service by delete it from array
 services:
