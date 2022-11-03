@@ -5,13 +5,15 @@ import (
 	"shadowproxy/logger"
 	"strings"
 	"sync"
+	"time"
 )
 
 var EnableFillter bool = true
 
 type IPStatue struct {
-	IP    string
-	Statu byte
+	IP            string
+	Statu         byte
+	LastCheckTime time.Time
 }
 
 func Filter(addr string) bool {
@@ -42,7 +44,7 @@ func AppendWhiteList(addr string) {
 		return
 	}
 
-	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1}
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1, LastCheckTime: time.Now()}
 
 }
 
