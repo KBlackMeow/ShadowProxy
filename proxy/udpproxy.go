@@ -14,7 +14,7 @@ import (
 // UDP Port Proxy
 
 type UDPConn struct {
-	Addr         *net.UDPAddr
+	addr         *net.UDPAddr
 	backendConn  net.Conn
 	listenerConn *net.UDPConn
 	TTL          int64
@@ -43,7 +43,7 @@ func GetUDPConn(addr string) (*UDPConn, bool) {
 
 func (conn UDPConn) Write(buff []byte) (int, error) {
 
-	return conn.listenerConn.WriteToUDP(buff, conn.Addr)
+	return conn.listenerConn.WriteToUDP(buff, conn.addr)
 
 }
 
@@ -153,7 +153,7 @@ func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *UDPConn
 	logger.Log("UDP", backendAddr, "Bob connected.")
 
 	conn := new(UDPConn)
-	conn.Addr = addr
+	conn.addr = addr
 	conn.backendConn = backend
 	conn.TTL = 10000
 	conn.RecvTime = time.Now()
@@ -187,7 +187,7 @@ func (conn *UDPConn) back() {
 			return
 		}
 
-		logger.Log("UDP", from.RemoteAddr().String(), "->", to.Addr.String(), n2, "Bytes")
+		logger.Log("UDP", from.RemoteAddr().String(), "->", to.addr.String(), n2, "Bytes")
 		to.RecvTime = time.Now()
 	}
 }
