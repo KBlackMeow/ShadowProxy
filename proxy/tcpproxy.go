@@ -80,7 +80,6 @@ func handler(conn net.Conn, backendAddr string) {
 
 	transform.DeleteAddr(backend.LocalAddr().String())
 
-	// delete(iptable.IPToConns, conn.RemoteAddr().String())
 	connmanager.CloseConnFromIP(conn.RemoteAddr().String())
 	logger.Log("TCP", conn.RemoteAddr().String(), "Alice connection is closed.")
 
