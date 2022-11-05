@@ -20,7 +20,7 @@ type IPStatue struct {
 func Filter(addr string) bool {
 
 	addr = strings.Split(addr, ":")[0]
-
+	// logger.Log("Check ", addr)
 	var ret = false
 	ret = ret || WhiteListFilter(addr)
 	ret = ret || BlackListFilter(addr)

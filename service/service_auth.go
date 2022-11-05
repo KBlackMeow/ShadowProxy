@@ -34,7 +34,7 @@ func (service AuthService) token(remoteAddr string) string {
 	return cryptotools.Hash_SHA512(remoteAddr)
 }
 
-func (service Service) verifyToken(remoteAddr string, token string) bool {
+func (service AuthService) verifyToken(remoteAddr string, token string) bool {
 
 	return token == cryptotools.Hash_SHA512(remoteAddr)
 

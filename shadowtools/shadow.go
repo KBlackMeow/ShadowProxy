@@ -15,7 +15,7 @@ func InitShadowService() {
 
 	serviceAddr := config.ShadowProxyConfig.Shadow
 
-	logger.Log(serviceAddr)
+	logger.Log("Shadow Addr:", serviceAddr)
 	addrs := strings.Split(serviceAddr, ":")
 	addr := net.ParseIP(addrs[0])
 
