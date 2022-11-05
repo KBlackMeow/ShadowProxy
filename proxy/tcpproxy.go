@@ -2,52 +2,14 @@ package proxy
 
 import (
 	"net"
+	"shadowproxy/connmanager"
 	"shadowproxy/filter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
 	"shadowproxy/shadowtools"
 	"shadowproxy/transform"
 	"strings"
-	"sync"
 )
-
-type IPConns struct {
-	IP    string
-	Conns []net.Conn
-}
-
-var IPToConns = map[string]*IPConns{}
-var TCPMutex = new(sync.Mutex)
-
-func AddConnToIP(conn net.Conn, addr string) {
-
-	TCPMutex.Lock()
-	defer TCPMutex.Unlock()
-	ip := strings.Split(addr, ":")[0]
-
-	ipConns, ok := IPToConns[ip]
-	if ok {
-		ipConns.Conns = append(ipConns.Conns, conn)
-		return
-	}
-	IPToConns[ip] = &IPConns{IP: addr, Conns: []net.Conn{conn}}
-
-}
-
-func CloseConnFromIP(addr string) {
-
-	ip := strings.Split(addr, ":")[0]
-	TCPMutex.Lock()
-	defer TCPMutex.Unlock()
-	ipConns, ok := IPToConns[ip]
-	if ok {
-		for _, v := range ipConns.Conns {
-			v.Close()
-		}
-		delete(IPToConns, addr)
-	}
-
-}
 
 type TCPProxy struct {
 	bindAddr    string
@@ -108,7 +70,7 @@ func handler(conn net.Conn, backendAddr string) {
 	defer backend.Close()
 
 	transform.SetRemoteAddrToLocalAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
-	AddConnToIP(backend, conn.RemoteAddr().String())
+	connmanager.AddConnToIP(backend, conn.RemoteAddr().String())
 	logger.Log("TCP", backendAddr, "Bob connected.")
 
 	closed := make(chan bool, 2)
@@ -118,8 +80,8 @@ func handler(conn net.Conn, backendAddr string) {
 
 	transform.DeleteAddr(backend.LocalAddr().String())
 
-	delete(IPToConns, conn.RemoteAddr().String())
-
+	// delete(iptable.IPToConns, conn.RemoteAddr().String())
+	connmanager.CloseConnFromIP(conn.RemoteAddr().String())
 	logger.Log("TCP", conn.RemoteAddr().String(), "Alice connection is closed.")
 
 }

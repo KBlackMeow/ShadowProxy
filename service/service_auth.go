@@ -6,10 +6,10 @@ import (
 	"html/template"
 	"net/http"
 	"shadowproxy/config"
+	"shadowproxy/connmanager"
 	"shadowproxy/cryptotools"
 	"shadowproxy/filter"
 	"shadowproxy/logger"
-	"shadowproxy/proxy"
 	"shadowproxy/transform"
 	"strconv"
 	"strings"
@@ -84,7 +84,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 			res, _ := json.Marshal(&userinfo)
 			fmt.Fprint(w, string(res))
 
-			go proxy.CloseConnFromIP(remoteAddr)
+			go connmanager.CloseConnFromIP(remoteAddr)
 			return
 		}
 
