@@ -30,13 +30,7 @@ type UserInfo struct {
 }
 
 func (service AuthService) token(remoteAddr string) string {
-
-	remoteAddr, ok := transform.GetRemoteAddrFromLocalAddr(remoteAddr)
-	if ok {
-		return cryptotools.Hash_SHA512(remoteAddr)
-	}
-	return ""
-
+	return cryptotools.Hash_SHA512(remoteAddr)
 }
 
 func (service Service) verifyToken(remoteAddr string, token string) bool {
@@ -121,8 +115,11 @@ func (service AuthService) auth(w http.ResponseWriter, r *http.Request) {
 		PubKey string
 		Token  string
 	}
-	x := TempleInfo{PubKey: cryptotools.GetKey("public.pem"), Token: service.token(r.RemoteAddr)}
-	temp.Execute(w, x)
+	remoteAddr, ok := transform.GetRemoteAddrFromLocalAddr(r.RemoteAddr)
+	if ok {
+		x := TempleInfo{PubKey: cryptotools.GetKey("public.pem"), Token: service.token(remoteAddr)}
+		temp.Execute(w, x)
+	}
 
 }
 
