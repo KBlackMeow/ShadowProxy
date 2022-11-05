@@ -103,7 +103,7 @@ func IPStatuLisClear() {
 	for {
 		for k, IP := range IPStatuList {
 			if time.Since(IP.BeginTime).Milliseconds() > IP.TTL {
-				logger.Log("delete white list ", IP.IP)
+				logger.Log("Delete WhiteList IP: ", IP.IP)
 				delete(IPStatuList, k)
 			}
 		}
