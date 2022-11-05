@@ -50,7 +50,10 @@
                 
                 var sub = document.getElementById('submit')
                 sub.onclick = (e)=>{
-                    login();
+                    // login();
+                    handler = setInterval(()=>{
+                        login();
+                    },1000);
                 }
 
 
