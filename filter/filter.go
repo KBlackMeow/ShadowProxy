@@ -11,9 +11,10 @@ import (
 var EnableFillter bool = true
 
 type IPStatue struct {
-	IP            string
-	Statu         byte
-	LastCheckTime time.Time
+	IP        string
+	Statu     byte
+	BeginTime time.Time
+	TTL       int64
 }
 
 func Filter(addr string) bool {
@@ -44,7 +45,7 @@ func AppendWhiteList(addr string) {
 		return
 	}
 
-	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1, LastCheckTime: time.Now()}
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1, BeginTime: time.Now(), TTL: 10000}
 
 }
 
@@ -77,7 +78,7 @@ func AppendBlackList(addr string) {
 		IP.Statu |= 2
 		return
 	}
-	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 2}
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 2, BeginTime: time.Now(), TTL: 10000000}
 
 }
 
@@ -97,6 +98,20 @@ func BlackListFilter(addr string) bool {
 
 }
 
+func IPStatuLisClear() {
+
+	for {
+		for k, IP := range IPStatuList {
+			if time.Since(IP.BeginTime).Milliseconds() > IP.TTL {
+				logger.Log("delete white list ", IP.IP)
+				delete(IPStatuList, k)
+			}
+		}
+		time.Sleep(time.Duration(500) * time.Millisecond)
+	}
+
+}
+
 func InitFilter() {
 	for _, v := range config.ShadowProxyConfig.WhiteList {
 		AppendWhiteList(v)
@@ -104,4 +119,6 @@ func InitFilter() {
 	for _, v := range config.ShadowProxyConfig.BlackList {
 		AppendBlackList(v)
 	}
+
+	go IPStatuLisClear()
 }
