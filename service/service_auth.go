@@ -30,6 +30,7 @@ type UserInfo struct {
 }
 
 func (service AuthService) token(remoteAddr string) string {
+
 	return cryptotools.Hash_SHA512(remoteAddr)
 }
 
