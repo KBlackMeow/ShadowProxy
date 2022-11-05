@@ -97,7 +97,7 @@ func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *connman
 	connmanager.SetUDPConn(addr.String(), conn)
 	transform.SetRemoteAddrToLocalAddr(backend.LocalAddr().String(), addr.String())
 
-	go conn.CallBack()
+	go conn.BackWord()
 	return conn
 
 }
