@@ -2,6 +2,7 @@ package filter
 
 import (
 	"shadowproxy/config"
+	"shadowproxy/connmanager"
 	"shadowproxy/logger"
 	"strings"
 	"sync"
@@ -40,7 +41,13 @@ func AppendWhiteList(addr string) {
 	defer Mutex.Unlock()
 
 	IP, ok := IPStatuList[addr]
+
+	if !ok || IP.Statu&1 != 1 {
+		connmanager.CloseConnFromIP(addr)
+	}
+
 	if ok {
+
 		IP.Statu |= 1
 		IP.BeginTime = time.Now()
 		return
@@ -57,6 +64,7 @@ func WhiteListFilter(addr string) bool {
 
 	IP, ok := IPStatuList[addr]
 	if ok {
+
 		if IP.Statu%2 == 1 {
 			return false
 		}
@@ -75,7 +83,12 @@ func AppendBlackList(addr string) {
 	logger.Warn("Black list", addr, "appended")
 
 	IP, ok := IPStatuList[addr]
+
+	if !ok || IP.Statu&2/2 != 1 {
+		connmanager.CloseConnFromIP(addr)
+	}
 	if ok {
+
 		IP.Statu |= 2
 		IP.BeginTime = time.Now()
 		return
@@ -106,6 +119,7 @@ func IPStatuLisClear() {
 		for k, IP := range IPStatuList {
 			if time.Since(IP.BeginTime).Milliseconds() > IP.TTL {
 				logger.Log("Delete WhiteList IP: ", IP.IP)
+				connmanager.CloseConnFromIP(IP.IP)
 				delete(IPStatuList, k)
 			}
 		}
