@@ -42,6 +42,7 @@ func AppendWhiteList(addr string) {
 	IP, ok := IPStatuList[addr]
 	if ok {
 		IP.Statu |= 1
+		IP.BeginTime = time.Now()
 		return
 	}
 
@@ -76,9 +77,10 @@ func AppendBlackList(addr string) {
 	IP, ok := IPStatuList[addr]
 	if ok {
 		IP.Statu |= 2
+		IP.BeginTime = time.Now()
 		return
 	}
-	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 2, BeginTime: time.Now(), TTL: 10000000}
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 2, BeginTime: time.Now(), TTL: 300000}
 
 }
 
