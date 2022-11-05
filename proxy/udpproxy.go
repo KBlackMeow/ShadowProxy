@@ -33,10 +33,10 @@ func (proxy UDProxy) Run() {
 	defer listener.Close()
 	logger.Log("UDP", proxy.bindAddr, "udp-proxy started.")
 	proxy.listener = listener
-	proxy.forword()
+	proxy.Forword()
 
 }
-func (proxy UDProxy) forword() {
+func (proxy UDProxy) Forword() {
 
 	for {
 		buffer := make([]byte, 4096)
@@ -97,7 +97,7 @@ func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *connman
 	connmanager.SetUDPConn(addr.String(), conn)
 	transform.SetRemoteAddrToLocalAddr(backend.LocalAddr().String(), addr.String())
 
-	go conn.BackWord()
+	go conn.Backword()
 	return conn
 
 }

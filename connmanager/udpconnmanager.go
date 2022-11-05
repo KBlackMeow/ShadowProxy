@@ -27,7 +27,7 @@ func (conn UDPConn) Close() {
 
 }
 
-func (conn *UDPConn) BackWord() {
+func (conn *UDPConn) Backword() {
 	from := conn.BackendConn
 	to := conn
 	for {
