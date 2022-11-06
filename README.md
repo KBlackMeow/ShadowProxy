@@ -28,6 +28,12 @@ consoleoutput: true
 
 debug: false
 
+# true :client,false: server
+client:false
+
+# auth server address
+authserver: 127.0.0.1:5555
+
 # The shadow service will be visited if client ip is not in white list or in black list.
 shadow: 127.0.0.1:57575
 
