@@ -20,7 +20,7 @@ func (service FlagService) flag(w http.ResponseWriter, r *http.Request) {
 
 func (service FlagService) Run() {
 
-	logger.Log("Flag Service Starting...")
+	logger.Log("Flag Service Addr", service.serviceAddr)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/flag", service.flag)
 

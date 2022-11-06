@@ -117,7 +117,7 @@ func (service AuthService2) Contraller() {
 
 func (service AuthService2) Run() {
 
-	logger.Log("Auth2 Service Starting...")
+	logger.Log("Auth2 Service Addr", service.serviceAddr)
 	if config.ShadowProxyConfig.AuthSSL {
 		err := http.ListenAndServeTLS(service.serviceAddr, "server.crt", "server.key", nil)
 		if err != nil {
