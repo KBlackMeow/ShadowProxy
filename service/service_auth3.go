@@ -39,7 +39,6 @@ func (service AuthService3) auth() {
 	for {
 		buffer := make([]byte, 4096)
 		n1, addr, err := service.listener.ReadFromUDP(buffer)
-
 		if err != nil {
 			logger.Error("UDP", err)
 			return
@@ -47,8 +46,8 @@ func (service AuthService3) auth() {
 
 		loginMsg := AuthMsg{}
 		e1 := json.Unmarshal(buffer[0:n1], &loginMsg)
-		if e1 == nil {
-			logger.Log(e1)
+		if e1 != nil {
+			logger.Error(e1)
 			continue
 		}
 

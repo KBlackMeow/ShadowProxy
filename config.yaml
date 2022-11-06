@@ -5,8 +5,9 @@ enablefilter: true
 consoleoutput: true
 debug: false
 shadows: 127.0.0.1:57575
+authserver: 127.0.0.1:5555
 services:
-- auth
+- auth1
 - auth2
 - auth3
 - flag
