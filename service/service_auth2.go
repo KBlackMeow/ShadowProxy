@@ -48,7 +48,7 @@ func (service AuthService2) verify(w http.ResponseWriter, r *http.Request) {
 	msgs := strings.Split(msg, "#")
 
 	if msg == "" || len(msgs) != 3 {
-		logger.Warn("Auth", remoteAddr, "RSA Public Key is wrong")
+		logger.Warn("Auth2", remoteAddr, "RSA Public Key is wrong")
 		time.Sleep(time.Duration(3000) * time.Millisecond)
 		return
 	}
@@ -59,7 +59,7 @@ func (service AuthService2) verify(w http.ResponseWriter, r *http.Request) {
 
 	token := msgs[2]
 	if !service.verifyToken(remoteAddr, token) {
-		logger.Warn("Auth", remoteAddr, "Token is wrong")
+		logger.Warn("Auth2", remoteAddr, "Token is wrong")
 		time.Sleep(time.Duration(3000) * time.Millisecond)
 		return
 	}
@@ -75,11 +75,11 @@ func (service AuthService2) verify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if password != cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
-		logger.Warn("Auth", remoteAddr, "Password is wrong")
+		logger.Warn("Auth2", remoteAddr, "Password is wrong")
 	} else if (time.Now().UnixMilli() - msgUnixTime) > 1000 {
-		logger.Warn("Auth", remoteAddr, "Unix Time exceed the time limit")
+		logger.Warn("Auth2", remoteAddr, "Unix Time exceed the time limit")
 	} else {
-		logger.Warn("Auth", remoteAddr, "Alice is attacking the server")
+		logger.Warn("Auth2", remoteAddr, "Alice is attacking the server")
 	}
 
 	time.Sleep(time.Duration(3000) * time.Millisecond)

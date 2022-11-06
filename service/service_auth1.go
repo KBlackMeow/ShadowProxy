@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-type AuthService struct {
+type AuthService1 struct {
 	Service
 }
 
@@ -28,18 +28,18 @@ type UserInfo struct {
 	UserLoginTime string
 }
 
-func (service AuthService) token(remoteAddr string) string {
+func (service AuthService1) token(remoteAddr string) string {
 
 	return cryptotools.Hash_SHA512(remoteAddr)
 }
 
-func (service AuthService) verifyToken(remoteAddr string, token string) bool {
+func (service AuthService1) verifyToken(remoteAddr string, token string) bool {
 
 	return token == cryptotools.Hash_SHA512(remoteAddr)
 
 }
 
-func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
+func (service AuthService1) verify(w http.ResponseWriter, r *http.Request) {
 
 	remoteAddr, ok := transform.GetRemoteAddrFromLocalAddr(r.RemoteAddr)
 
@@ -59,7 +59,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 		msgs := strings.Split(msg, "#")
 
 		if msg == "" || len(msgs) != 3 {
-			logger.Warn("Auth", remoteAddr, "RSA Public Key is wrong")
+			logger.Warn("Auth1", remoteAddr, "RSA Public Key is wrong")
 			time.Sleep(time.Duration(3000) * time.Millisecond)
 			return
 		}
@@ -70,7 +70,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
 		token := msgs[2]
 		if !service.verifyToken(remoteAddr, token) {
-			logger.Warn("Auth", remoteAddr, "Token is wrong")
+			logger.Warn("Auth1", remoteAddr, "Token is wrong")
 			time.Sleep(time.Duration(3000) * time.Millisecond)
 			return
 		}
@@ -88,11 +88,11 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if password != cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
-			logger.Warn("Auth", remoteAddr, "Password is wrong")
+			logger.Warn("Auth1", remoteAddr, "Password is wrong")
 		} else if (time.Now().UnixMilli() - msgUnixTime) > 1000 {
-			logger.Warn("Auth", remoteAddr, "Unix Time exceed the time limit")
+			logger.Warn("Auth1", remoteAddr, "Unix Time exceed the time limit")
 		} else {
-			logger.Warn("Auth", remoteAddr, "Alice is attacking the server")
+			logger.Warn("Auth1", remoteAddr, "Alice is attacking the server")
 		}
 	}
 
@@ -103,7 +103,7 @@ func (service AuthService) verify(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (service AuthService) auth(w http.ResponseWriter, r *http.Request) {
+func (service AuthService1) auth(w http.ResponseWriter, r *http.Request) {
 
 	temp, err := template.ParseFiles("template/auth.html")
 	if err != nil {
@@ -123,16 +123,16 @@ func (service AuthService) auth(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (service AuthService) Contraller() {
+func (service AuthService1) Contraller() {
 
 	http.HandleFunc("/auth", service.auth)
 	http.HandleFunc("/verify", service.verify)
 
 }
 
-func (service AuthService) Run() {
+func (service AuthService1) Run() {
 
-	logger.Log("Auth Service Addr", service.serviceAddr)
+	logger.Log("Auth1 Service Addr", service.serviceAddr)
 	if config.ShadowProxyConfig.AuthSSL {
 		err := http.ListenAndServeTLS(service.serviceAddr, "server.crt", "server.key", nil)
 		if err != nil {
@@ -147,13 +147,13 @@ func (service AuthService) Run() {
 
 }
 
-func (service AuthService) GetName() string {
+func (service AuthService1) GetName() string {
 
 	return service.serviceName
 
 }
 
-func (service AuthService) GetAddr() string {
+func (service AuthService1) GetAddr() string {
 
 	return service.serviceAddr
 
@@ -161,8 +161,8 @@ func (service AuthService) GetAddr() string {
 
 func init() {
 
-	service := AuthService{Service{serviceName: "auth", serviceAddr: "127.0.0.1:57575"}}
+	service := AuthService1{Service{serviceName: "Auth1", serviceAddr: "127.0.0.1:57575"}}
 	service.Contraller()
-	ServiceAppend("auth", service)
+	ServiceAppend("Auth1", service)
 
 }
