@@ -4,6 +4,7 @@ authssl: false
 enablefilter: true
 consoleoutput: true
 debug: false
+client: false
 shadows: 127.0.0.1:57575
 authserver: 127.0.0.1:5555
 services:

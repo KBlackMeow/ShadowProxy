@@ -122,5 +122,5 @@ func (c Client) Login() {
 func ClientInit() {
 
 	c := Client{Token: "", Pubkey: "", Password: config.ShadowProxyConfig.Password, Addr: config.ShadowProxyConfig.AuthServer}
-	go c.Login()
+	c.Login()
 }

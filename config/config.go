@@ -14,6 +14,7 @@ type Config struct {
 	EnableFilter  bool     `yaml:"enablefilter"`
 	ConsoleOutput bool     `yaml:"consoleoutput"`
 	Debug         bool     `yaml:"debug"`
+	Client        bool     `yaml:"client"`
 	Shadow        string   `yaml:"shadows"`
 	AuthServer    string   `yaml:"authserver"`
 	Services      []string `yaml:"services"`
@@ -51,6 +52,7 @@ func GenEmptyConfig() {
 		AuthSSL:       false,
 		EnableFilter:  true,
 		ConsoleOutput: true,
+		Client:        false,
 		Shadow:        "127.0.0.1:57575",
 		AuthServer:    "127.0.0.1:5555",
 		Services:      []string{"auth", "flag", "cmd"},

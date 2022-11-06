@@ -15,12 +15,15 @@ func init() {
 	config.InitConfig()
 }
 
-func ComponentInit() {
+func ClientComponentInit() {
+	client.ClientInit()
+}
+
+func ServerComponentInit() {
 
 	service.InitServices()
 	shadowtools.InitShadowService()
 	filter.InitFilter()
-	client.ClientInit()
 	proxy.RunProxy()
 
 }
@@ -40,5 +43,9 @@ func main() {
 		config.FilePath = *cfg
 	}
 
-	ComponentInit()
+	if !config.ShadowProxyConfig.Client {
+		ServerComponentInit()
+	} else {
+		ClientComponentInit()
+	}
 }
