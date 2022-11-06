@@ -161,8 +161,8 @@ func (service AuthService1) GetAddr() string {
 
 func init() {
 
-	service := AuthService1{Service{serviceName: "Auth1", serviceAddr: "127.0.0.1:57575"}}
+	service := AuthService1{Service{serviceName: "auth1", serviceAddr: "127.0.0.1:57575"}}
 	service.Contraller()
-	ServiceAppend("Auth1", service)
+	ServiceAppend("auth1", service)
 
 }
