@@ -6,6 +6,7 @@ import (
 	"shadowproxy/config"
 	"shadowproxy/cryptotools"
 	"shadowproxy/filter"
+	"shadowproxy/ids"
 	"shadowproxy/logger"
 	"strconv"
 	"strings"
@@ -39,6 +40,7 @@ func (service AuthService3) auth() {
 	for {
 		buffer := make([]byte, 4096)
 		n1, addr, err := service.listener.ReadFromUDP(buffer)
+		ids.CheckIP(addr.String())
 		if err != nil {
 			logger.Error("UDP", err)
 			return
@@ -83,7 +85,7 @@ func (service AuthService3) auth() {
 
 			if (time.Now().UnixMilli()-msgUnixTime) > 0 && (time.Now().UnixMilli()-msgUnixTime) < 1000 &&
 				password == cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
-				filter.AppendWhiteList(remoteAddr)
+				filter.AppendWhiteList(remoteAddr, 10000)
 				continue
 			}
 

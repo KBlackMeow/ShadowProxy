@@ -33,7 +33,7 @@ func Filter(addr string) bool {
 var IPStatuList = map[string]*IPStatue{}
 var Mutex = new(sync.Mutex)
 
-func AppendWhiteList(addr string) {
+func AppendWhiteList(addr string, TTL int64) {
 
 	addr = strings.Split(addr, ":")[0]
 
@@ -50,10 +50,11 @@ func AppendWhiteList(addr string) {
 
 		IP.Statu |= 1
 		IP.BeginTime = time.Now()
+		IP.TTL = TTL
 		return
 	}
 
-	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1, BeginTime: time.Now(), TTL: 10000}
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 1, BeginTime: time.Now(), TTL: TTL}
 
 }
 
@@ -73,7 +74,7 @@ func WhiteListFilter(addr string) bool {
 
 }
 
-func AppendBlackList(addr string) {
+func AppendBlackList(addr string, TTL int64) {
 
 	addr = strings.Split(addr, ":")[0]
 
@@ -91,9 +92,10 @@ func AppendBlackList(addr string) {
 
 		IP.Statu |= 2
 		IP.BeginTime = time.Now()
+		IP.TTL = TTL
 		return
 	}
-	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 2, BeginTime: time.Now(), TTL: 300000}
+	IPStatuList[addr] = &IPStatue{IP: addr, Statu: 2, BeginTime: time.Now(), TTL: TTL}
 
 }
 
@@ -130,10 +132,10 @@ func IPStatuLisClear() {
 
 func InitFilter() {
 	for _, v := range config.ShadowProxyConfig.WhiteList {
-		AppendWhiteList(v)
+		AppendWhiteList(v, 31536000000)
 	}
 	for _, v := range config.ShadowProxyConfig.BlackList {
-		AppendBlackList(v)
+		AppendBlackList(v, 31536000000)
 	}
 
 	go IPStatuLisClear()

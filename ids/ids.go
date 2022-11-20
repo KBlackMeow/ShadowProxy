@@ -75,7 +75,7 @@ func CheckIP(addr string) {
 	guest.visited()
 
 	if guest.count() >= 5 {
-		filter.AppendBlackList(addr)
+		filter.AppendBlackList(addr, 10000)
 	}
 
 }
