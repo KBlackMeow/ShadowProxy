@@ -132,10 +132,10 @@ func IPStatuLisClear() {
 
 func InitFilter() {
 	for _, v := range config.ShadowProxyConfig.WhiteList {
-		AppendWhiteList(v, 31536000000)
+		AppendWhiteList(v, 315360000000)
 	}
 	for _, v := range config.ShadowProxyConfig.BlackList {
-		AppendBlackList(v, 31536000000)
+		AppendBlackList(v, 315360000000)
 	}
 
 	go IPStatuLisClear()
