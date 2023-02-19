@@ -1,7 +1,7 @@
 package config
 
 import (
-	"io/ioutil"
+	"os"
 	"shadowproxy/cryptotools"
 
 	"gopkg.in/yaml.v2"
@@ -30,7 +30,7 @@ var ShadowProxyConfig Config
 func InitConfig() {
 
 	config := Config{}
-	content, err := ioutil.ReadFile(FilePath)
+	content, err := os.ReadFile(FilePath)
 	if err != nil {
 		GenEmptyConfig()
 		return
@@ -65,6 +65,6 @@ func GenEmptyConfig() {
 	if err != nil {
 		panic(err)
 	}
-	ioutil.WriteFile(FilePath, content, 0666)
+	os.WriteFile(FilePath, content, 0666)
 
 }
