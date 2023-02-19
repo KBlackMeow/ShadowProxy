@@ -55,7 +55,7 @@ func GenEmptyConfig() {
 		Client:        false,
 		Shadow:        "127.0.0.1:57575",
 		AuthServer:    "127.0.0.1:5555",
-		Services:      []string{"auth1", "auth2", "auth3", "flag", "cmd"},
+		Services:      []string{"auth1", "auth2", "flag", "cmd"},
 		Rules:         []string{"tcp://0.0.0.0:30000->127.0.0.1:40000"},
 		WhiteList:     []string{"127.0.0.1"},
 		BlackList:     []string{},
