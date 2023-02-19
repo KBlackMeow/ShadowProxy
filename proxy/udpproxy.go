@@ -54,7 +54,7 @@ func (proxy UDProxy) Forword() {
 		} else {
 			udpConn, ok := connmanager.GetUDPConn(addr.String())
 			if !ok {
-				ids.CheckIP(addr.String())
+				go ids.CheckIP(addr.String())
 				udpConn = link(proxy.listener, addr, proxy.backendAddr)
 			}
 

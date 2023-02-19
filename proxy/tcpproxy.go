@@ -37,7 +37,7 @@ func (proxy TCPProxy) Run() {
 			WG.Done()
 			return
 		}
-		ids.CheckIP(conn.RemoteAddr().String())
+		go ids.CheckIP(conn.RemoteAddr().String())
 
 		shadowAddr := shadowtools.GetShadowAddr()
 
