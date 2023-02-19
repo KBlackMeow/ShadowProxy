@@ -14,6 +14,15 @@ import (
 	"time"
 )
 
+type LoginInfo struct {
+	CMsg string `json:"cmsg"`
+}
+
+type UserInfo struct {
+	UserAddr      string
+	UserLoginTime string
+}
+
 type AuthService2 struct {
 	Service
 }
