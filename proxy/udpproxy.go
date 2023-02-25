@@ -51,28 +51,28 @@ func (proxy UDProxy) Forword() {
 		if filter.Filter(addr.String()) {
 			logger.Warn("UDP", addr.String(), "Alice is filtrated")
 			continue
-		} else {
-			udpConn, ok := connmanager.GetUDPConn(addr.String())
-			if !ok {
-				go ids.CheckIP(addr.String())
-				udpConn = link(proxy.listener, addr, proxy.backendAddr)
-			}
-
-			go ids.PackageLengthRecorder(addr.String(), n1)
-			n2, err := udpConn.BackendConn.Write(buffer[:n1])
-
-			if err != nil {
-				logger.Error("UDP", err)
-				connmanager.CloseUDPConnFromAddr(addr.String())
-				continue
-			}
-
-			logger.Log("UDP", addr.String(), "->", udpConn.BackendConn.RemoteAddr().String(), n2, "Bytes")
-			connmanager.UDPConns[addr.String()].RecvTime = time.Now()
-
 		}
 
+		udpConn, ok := connmanager.GetUDPConn(addr.String())
+		if !ok {
+			go ids.CheckIP(addr.String())
+			udpConn = link(proxy.listener, addr, proxy.backendAddr)
+		}
+
+		go ids.PackageLengthRecorder(addr.String(), n1)
+		n2, err := udpConn.BackendConn.Write(buffer[:n1])
+
+		if err != nil {
+			logger.Error("UDP", err)
+			connmanager.CloseUDPConnFromAddr(addr.String())
+			continue
+		}
+
+		logger.Log("UDP", addr.String(), "->", udpConn.BackendConn.RemoteAddr().String(), n2, "Bytes")
+		connmanager.UDPConns[addr.String()].RecvTime = time.Now()
+
 	}
+
 }
 
 func link(listener *net.UDPConn, addr *net.UDPAddr, backendAddr string) *connmanager.UDPConn {
