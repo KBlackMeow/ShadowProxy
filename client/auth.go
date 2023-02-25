@@ -14,10 +14,10 @@ import (
 	"time"
 )
 
-type AuthMsg struct {
-	Token  string
-	Pubkey string
-	Msg    string
+type AuthMessage struct {
+	Token   string
+	Pubkey  string
+	Message string
 }
 type Client struct {
 	Addr     string
@@ -29,13 +29,13 @@ type Client struct {
 
 func (c *Client) GetKey() {
 
-	msg := AuthMsg{
-		Token:  "",
-		Pubkey: "",
-		Msg:    "1234567",
+	Message := AuthMessage{
+		Token:   "",
+		Pubkey:  "",
+		Message: "1234567",
 	}
 
-	data, e1 := json.Marshal(msg)
+	data, e1 := json.Marshal(Message)
 	if e1 != nil {
 		logger.Error(e1)
 
@@ -54,18 +54,18 @@ func (c *Client) Listen() {
 			continue
 		}
 
-		msg := AuthMsg{}
+		Message := AuthMessage{}
 
-		e1 := json.Unmarshal(buffer[:n1], &msg)
+		e1 := json.Unmarshal(buffer[:n1], &Message)
 
 		if e1 != nil {
 			logger.Error(e1)
 			continue
 		}
 
-		if msg.Pubkey != "" {
-			c.Token = msg.Token
-			c.Pubkey = msg.Pubkey
+		if Message.Pubkey != "" {
+			c.Token = Message.Token
+			c.Pubkey = Message.Pubkey
 			logger.Log("Login : Get PubKey, length:", len(c.Pubkey))
 		}
 
@@ -85,7 +85,7 @@ func (c Client) Login() {
 
 	for {
 		if c.Pubkey != "" {
-			msg := c.Password + "#" + fmt.Sprint(time.Now().UnixMilli()) + "#" + c.Token
+			Message := c.Password + "#" + fmt.Sprint(time.Now().UnixMilli()) + "#" + c.Token
 
 			block, _ := pem.Decode([]byte(c.Pubkey))
 			publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
@@ -96,17 +96,17 @@ func (c Client) Login() {
 			}
 
 			publicKey := publicKeyInterface.(*rsa.PublicKey)
-			cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, []byte(msg))
+			cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, []byte(Message))
 			if err != nil {
 				logger.Error(err)
 				time.Sleep(time.Duration(3000) * time.Millisecond)
 				continue
 			}
-			cmsgb64 := base64.StdEncoding.EncodeToString(cipherText)
+			cMessageb64 := base64.StdEncoding.EncodeToString(cipherText)
 
-			loginMsg := AuthMsg{}
-			loginMsg.Msg = cmsgb64
-			data, _ := json.Marshal(loginMsg)
+			loginMessage := AuthMessage{}
+			loginMessage.Message = cMessageb64
+			data, _ := json.Marshal(loginMessage)
 
 			c.Conn.Write(data)
 

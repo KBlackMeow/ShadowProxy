@@ -15,7 +15,7 @@ import (
 )
 
 type LoginInfo struct {
-	CMsg string `json:"cmsg"`
+	CryptedMessage string `json:"CryptedMessage"`
 }
 
 type UserInfo struct {
@@ -52,28 +52,28 @@ func (service AuthService2) verify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmsg := loginfo.CMsg
-	msg := cryptotools.DecryptRSAToString(cmsg)
-	msgs := strings.Split(msg, "#")
+	CryptedMessage := loginfo.CryptedMessage
+	Message := cryptotools.DecryptRSAToString(CryptedMessage)
+	Messages := strings.Split(Message, "#")
 
-	if msg == "" || len(msgs) != 3 {
+	if Message == "" || len(Messages) != 3 {
 		logger.Warn("Auth2", remoteAddr, "RSA Public Key is wrong")
 		time.Sleep(time.Duration(3000) * time.Millisecond)
 		return
 	}
 
-	password := cryptotools.Hash_SHA512(msgs[0])
-	msgUnixTime, _ := strconv.ParseInt(msgs[1], 10, 64)
-	msgUnixTime = int64(msgUnixTime)
+	password := cryptotools.Hash_SHA512(Messages[0])
+	MessageUnixTime, _ := strconv.ParseInt(Messages[1], 10, 64)
+	MessageUnixTime = int64(MessageUnixTime)
 
-	token := msgs[2]
+	token := Messages[2]
 	if !service.verifyToken(remoteAddr, token) {
 		logger.Warn("Auth2", remoteAddr, "Token is wrong")
 		time.Sleep(time.Duration(3000) * time.Millisecond)
 		return
 	}
 
-	if (time.Now().UnixMilli()-msgUnixTime) > 0 && (time.Now().UnixMilli()-msgUnixTime) < 1000 &&
+	if (time.Now().UnixMilli()-MessageUnixTime) > 0 && (time.Now().UnixMilli()-MessageUnixTime) < 1000 &&
 		password == cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
 		filter.AppendWhiteList(remoteAddr, 10000)
 
@@ -85,7 +85,7 @@ func (service AuthService2) verify(w http.ResponseWriter, r *http.Request) {
 
 	if password != cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
 		logger.Warn("Auth2", remoteAddr, "Password is wrong")
-	} else if (time.Now().UnixMilli() - msgUnixTime) > 1000 {
+	} else if (time.Now().UnixMilli() - MessageUnixTime) > 1000 {
 		logger.Warn("Auth2", remoteAddr, "Unix Time exceed the time limit")
 	} else {
 		logger.Warn("Auth2", remoteAddr, "Alice is attacking the server")

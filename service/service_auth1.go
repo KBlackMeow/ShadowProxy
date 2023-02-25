@@ -13,10 +13,10 @@ import (
 	"time"
 )
 
-type AuthMsg struct {
-	Token  string
-	Pubkey string
-	Msg    string
+type AuthMessage struct {
+	Token   string
+	Pubkey  string
+	Message string
 }
 
 type AuthService1 struct {
@@ -46,44 +46,44 @@ func (service AuthService1) auth() {
 			return
 		}
 
-		loginMsg := AuthMsg{}
-		e1 := json.Unmarshal(buffer[0:n1], &loginMsg)
+		loginMessage := AuthMessage{}
+		e1 := json.Unmarshal(buffer[0:n1], &loginMessage)
 		if e1 != nil {
 			logger.Error(e1)
 			continue
 		}
 
-		if len(loginMsg.Msg) == 7 {
+		if len(loginMessage.Message) == 7 {
 
-			msg := AuthMsg{Token: service.token(addr.String()), Pubkey: cryptotools.GetKey("public.pem")}
-			data, _ := json.Marshal(&msg)
+			Message := AuthMessage{Token: service.token(addr.String()), Pubkey: cryptotools.GetKey("public.pem")}
+			data, _ := json.Marshal(&Message)
 			go service.listener.WriteToUDP(data, addr)
 
 		} else {
 
-			cmsg := loginMsg.Msg
-			msg := cryptotools.DecryptRSAToString(cmsg)
-			msgs := strings.Split(msg, "#")
+			cryptedMessage := loginMessage.Message
+			Message := cryptotools.DecryptRSAToString(cryptedMessage)
+			Messages := strings.Split(Message, "#")
 			remoteAddr := addr.String()
 
-			if msg == "" || len(msgs) != 3 {
+			if Message == "" || len(Messages) != 3 {
 				logger.Warn("Auth1", remoteAddr, "RSA Public Key is wrong")
 				time.Sleep(time.Duration(3000) * time.Millisecond)
 				continue
 			}
 
-			password := cryptotools.Hash_SHA512(msgs[0])
-			msgUnixTime, _ := strconv.ParseInt(msgs[1], 10, 64)
-			msgUnixTime = int64(msgUnixTime)
+			password := cryptotools.Hash_SHA512(Messages[0])
+			MessageUnixTime, _ := strconv.ParseInt(Messages[1], 10, 64)
+			MessageUnixTime = int64(MessageUnixTime)
 
-			token := msgs[2]
+			token := Messages[2]
 			if !service.verifyToken(remoteAddr, token) {
 				logger.Warn("Auth1", remoteAddr, "Token is wrong")
 				time.Sleep(time.Duration(3000) * time.Millisecond)
 				continue
 			}
 
-			if (time.Now().UnixMilli()-msgUnixTime) > 0 && (time.Now().UnixMilli()-msgUnixTime) < 1000 &&
+			if (time.Now().UnixMilli()-MessageUnixTime) > 0 && (time.Now().UnixMilli()-MessageUnixTime) < 1000 &&
 				password == cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
 				filter.AppendWhiteList(remoteAddr, 10000)
 				continue
@@ -91,7 +91,7 @@ func (service AuthService1) auth() {
 
 			if password != cryptotools.Hash_SHA512(config.ShadowProxyConfig.Password) {
 				logger.Warn("Auth1", remoteAddr, "Password is wrong")
-			} else if (time.Now().UnixMilli() - msgUnixTime) > 1000 {
+			} else if (time.Now().UnixMilli() - MessageUnixTime) > 1000 {
 				logger.Warn("Auth1", remoteAddr, "Unix Time exceed the time limit")
 			} else {
 				logger.Warn("Auth1", remoteAddr, "Alice is attacking the server")
