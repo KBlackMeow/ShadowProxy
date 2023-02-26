@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
+	"time"
 
-	"shadowproxy/client"
 	"shadowproxy/config"
-	"shadowproxy/filter"
 	"shadowproxy/proxy"
-	"shadowproxy/service"
-	"shadowproxy/shadowtools"
+	"shadowproxy/tunnel"
 )
 
 func init() {
@@ -16,14 +14,19 @@ func init() {
 }
 
 func ClientComponentInit() {
-	client.ClientInit()
+	// client.ClientInit()
 }
 
 func ServerComponentInit() {
 
-	service.InitServices()
-	shadowtools.InitShadowService()
-	filter.InitFilter()
+	// service.InitServices()
+	// shadowtools.InitShadowService()
+	// filter.InitFilter()
+
+	tunnel.TunnelInit2()
+	time.Sleep(time.Second * 1)
+	tunnel.TunnelInit1()
+
 	proxy.RunProxy()
 
 }

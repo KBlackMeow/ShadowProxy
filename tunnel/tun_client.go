@@ -10,21 +10,21 @@ import (
 type TunnelClient struct {
 	ServiceAddr     string
 	ServiceListener *net.UDPConn
-
-	Tunnels map[uint32]*Tunnel
+	TargetAddr      string
+	Tunnels         map[uint32]*Tunnel
 }
 
 func (client TunnelClient) Run() {
 	udpAddr, _ := net.ResolveUDPAddr("udp4", client.ServiceAddr)
-	conn, err := net.DialUDP("udp", nil, udpAddr)
+	listener, err := net.ListenUDP("udp4", udpAddr)
 
 	logger.Log("TUN", client.ServiceAddr, "tunnel connected.")
 
 	if err != nil {
-		logger.Error(err)
+		logger.Error("TUN", err)
 		return
 	}
-	client.ServiceListener = conn
+	client.ServiceListener = listener
 	defer client.ServiceListener.Close()
 
 	client.CreateTCPTunnel()
@@ -33,10 +33,13 @@ func (client TunnelClient) Run() {
 
 func (client TunnelClient) CreateTCPTunnel() {
 	addr := "127.0.0.1:10001"
+	udpAddr, _ := net.ResolveUDPAddr("udp4", client.TargetAddr)
 	tun := Tunnel{
 		TunnelID:   uint32(cryptotools.EasyHash_uint64(addr)),
 		TunnelConn: client.ServiceListener,
+		TunnelAddr: udpAddr,
 		TargetAddr: addr,
+		Lines:      map[uint32]*Line{},
 	}
 
 	client.Tunnels[tun.TunnelID] = &tun
@@ -46,7 +49,7 @@ func (client TunnelClient) CreateTCPTunnel() {
 		buffer := make([]byte, 4096)
 		n1, err := tun.TunnelConn.Read(buffer)
 		if err != nil {
-			logger.Error(err)
+			logger.Error("TUN", err)
 			continue
 		}
 
@@ -88,9 +91,11 @@ func (client TunnelClient) CreateTCPTunnel() {
 	}
 }
 
-func init() {
+func TunnelInit1() {
 	tunnelClient := TunnelClient{
-		ServiceAddr: "127.0.0.1:65534",
+		ServiceAddr: "127.0.0.1:65533",
+		TargetAddr:  "127.0.0.1:65534",
+		Tunnels:     map[uint32]*Tunnel{},
 	}
 
 	go tunnelClient.Run()

@@ -3,6 +3,7 @@ package tunnel
 import (
 	"encoding/json"
 	"net"
+	"shadowproxy/logger"
 )
 
 type TunnelPackage struct {
@@ -26,7 +27,9 @@ type Tunnel struct {
 }
 
 func (tun Tunnel) Write(data []byte) (int, error) {
-	return tun.TunnelConn.WriteToUDP(data, tun.TunnelAddr)
+	logger.Log("TUN Send", tun.TunnelAddr)
+	n1, err := tun.TunnelConn.WriteToUDP(data, tun.TunnelAddr)
+	return n1, err
 }
 
 func (tun Tunnel) SendToReal(pkg TunnelPackage) (int, error) {
@@ -49,6 +52,7 @@ func (tun Tunnel) CloseTun() {
 }
 
 func (tun Tunnel) NewTun() {
+	logger.Log("TUN", "New tun")
 	pkg := TunnelPackage{
 		TunnelID:  tun.TunnelID,
 		CloseLine: 0,

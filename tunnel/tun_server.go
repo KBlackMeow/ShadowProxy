@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net"
 	"shadowproxy/cryptotools"
-	"shadowproxy/filter"
-	"shadowproxy/ids"
 	"shadowproxy/logger"
 )
 
@@ -38,19 +36,15 @@ func (server TunnelServer) Run() {
 			return
 		}
 
-		if filter.Filter(addr.String()) {
-			logger.Warn("TUN", addr.String(), "Alice is filtrated")
-			continue
-		}
+		logger.Log("TUN", "read ", n1)
 
 		tunpak := TunnelPackage{}
 
 		e1 := json.Unmarshal(buffer[0:n1], &tunpak)
 		if e1 != nil {
-			logger.Error(e1)
+			logger.Error("TUN", e1)
 			continue
 		}
-		go ids.PackageLengthRecorder(addr.String(), n1)
 
 		if tunpak.NewTun == 1 {
 			server.CreateTCPTunnel(addr)
@@ -79,16 +73,20 @@ func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr) {
 		logger.Error("TUN", err)
 		return
 	}
+
+	logger.Log("TUN", addr, "target server listening.")
+
 	tun := Tunnel{
 		ListenConn: server.ServiceListener,
 		TunnelID:   uint32(cryptotools.EasyHash_uint64(remoteAddr.String())),
 		TunnelAddr: remoteAddr,
 		TunnelConn: server.ServiceListener,
+		Lines:      map[uint32]*Line{},
 	}
 
 	server.Tunnels[tun.TunnelID] = &tun
 	defer listener.Close()
-	logger.Log("TUN", addr, "tunnel started.")
+	logger.Log("TUN", addr, "tunnel", tun.TunnelID, " started.")
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -110,9 +108,10 @@ func (server TunnelServer) CreateUDPTunnel(remoteAddr *net.UDPAddr) {
 
 }
 
-func init() {
+func TunnelInit2() {
 	tunserver := TunnelServer{
 		ServiceAddr: "0.0.0.0:65534",
+		Tunnels:     map[uint32]*Tunnel{},
 	}
 
 	go tunserver.Run()
