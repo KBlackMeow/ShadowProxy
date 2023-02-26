@@ -21,16 +21,16 @@ type Tunnel struct {
 	RemoteAddr *net.UDPAddr
 	ListenConn net.Conn
 	TunnelConn *net.UDPConn
+	Lines      map[uint32]*Line
 }
 
 func (tun Tunnel) Write(data []byte) (int, error) {
-	n1, err := tun.TunnelConn.WriteToUDP(data, tun.RemoteAddr)
-	return n1, err
+	return tun.TunnelConn.WriteToUDP(data, tun.RemoteAddr)
 }
 
-func (tun Tunnel) Send(data []byte) (int, error) {
-	n1, err := tun.ListenConn.Write(data)
-	return n1, err
+func (tun Tunnel) Send(pkg TunnelPackage) (int, error) {
+	line := tun.Lines[pkg.LineID]
+	return line.WriteToLine(pkg.Bytes)
 }
 
 func (tun Tunnel) CloseTun() {

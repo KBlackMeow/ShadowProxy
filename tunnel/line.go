@@ -12,7 +12,7 @@ type Line struct {
 	Conn   net.Conn
 }
 
-func (line Line) Listen() {
+func (line Line) ListenFromLine() {
 
 	buffer := make([]byte, 4096)
 
@@ -46,11 +46,17 @@ func (line Line) WriteToLine(byt []byte) (int, error) {
 	}
 
 	data, _ := json.Marshal(pkg)
-	n1, err := line.Tun.Write(data)
-	return n1, err
+	return line.Tun.Write(data)
+}
+
+func (line Line) SendToLine(byt []byte) (int, error) {
+	return line.Conn.Write(byt)
 }
 
 func (line Line) NewLine() {
+
+	line.Tun.Lines[line.LineID] = &line
+
 	pkg := TunnelPackage{
 		TunnelID:  line.Tun.TunnelID,
 		LineID:    line.LineID,
@@ -62,6 +68,8 @@ func (line Line) NewLine() {
 	}
 	data, _ := json.Marshal(pkg)
 	line.Tun.Write(data)
+
+	go line.ListenFromLine()
 }
 
 func (line Line) CloseLine() {
@@ -74,6 +82,9 @@ func (line Line) CloseLine() {
 		NewLine:   0,
 		Bytes:     []byte{},
 	}
+
 	data, _ := json.Marshal(pkg)
 	line.Tun.Write(data)
+	delete(line.Tun.Lines, line.LineID)
+
 }
