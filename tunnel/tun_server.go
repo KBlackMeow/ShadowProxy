@@ -36,7 +36,7 @@ func (server TunnelServer) Run() {
 			return
 		}
 
-		logger.Log("TUN", addr.String(), "->", server.ServiceAddr, n1, "Bytes")
+		// logger.Log("TUN Server", addr.String(), "->", server.ServiceAddr, n1, "Bytes")
 
 		tunpak := TunnelPackage{}
 

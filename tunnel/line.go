@@ -14,17 +14,15 @@ type Line struct {
 
 func (line Line) ListenFromLine() {
 
-	buffer := make([]byte, 2048)
-
 	for {
+		buffer := make([]byte, 2048)
 		n1, err := line.Conn.Read(buffer)
 		if err != nil {
 			logger.Error(err)
 			line.CloseLine()
 			return
 		}
-		n2, err := line.WriteToLine(buffer[:n1])
-		logger.Log("TUN", line.Conn.RemoteAddr().String(), "->", line.Tun.TunnelAddr.String(), n2, "Bytes")
+		_, err = line.WriteToLine(buffer[:n1])
 
 		if err != nil {
 			logger.Error(err)

@@ -52,7 +52,7 @@ func (client TunnelClient) CreateTCPTunnel() {
 			logger.Error("TUN", err)
 			continue
 		}
-		logger.Log("TUN", "client read ", n1)
+		// logger.Log("TUN", "client read ", n1)
 		pkg := TunnelPackage{}
 		e1 := json.Unmarshal(buffer[:n1], &pkg)
 		if e1 != nil {
