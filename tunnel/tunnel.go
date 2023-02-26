@@ -18,14 +18,15 @@ type TunnelPackage struct {
 
 type Tunnel struct {
 	TunnelID   uint32
-	RemoteAddr *net.UDPAddr
+	TunnelAddr *net.UDPAddr
 	ListenConn net.Conn
 	TunnelConn *net.UDPConn
 	Lines      map[uint32]*Line
+	TargetAddr string
 }
 
 func (tun Tunnel) Write(data []byte) (int, error) {
-	return tun.TunnelConn.WriteToUDP(data, tun.RemoteAddr)
+	return tun.TunnelConn.WriteToUDP(data, tun.TunnelAddr)
 }
 
 func (tun Tunnel) Send(pkg TunnelPackage) (int, error) {

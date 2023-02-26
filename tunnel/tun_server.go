@@ -72,7 +72,7 @@ func (server TunnelServer) Run() {
 
 func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr) {
 
-	addr := "0.0.0.0:44556"
+	addr := "0.0.0.0:10002"
 	listener, err := net.Listen("tcp4", addr)
 
 	if err != nil {
@@ -82,7 +82,7 @@ func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr) {
 	tun := Tunnel{
 		ListenConn: server.ServiceListener,
 		TunnelID:   uint32(cryptotools.EasyHash_uint64(remoteAddr.String())),
-		RemoteAddr: remoteAddr,
+		TunnelAddr: remoteAddr,
 		TunnelConn: server.ServiceListener,
 	}
 

@@ -24,7 +24,7 @@ func (line Line) ListenFromLine() {
 		}
 
 		n2, err := line.Tun.Write(buffer[:n1])
-		logger.Log("TUN", line.Conn.RemoteAddr().String(), "->", line.Tun.RemoteAddr.String(), n2, "Bytes")
+		logger.Log("TUN", line.Conn.RemoteAddr().String(), "->", line.Tun.TunnelAddr.String(), n2, "Bytes")
 
 		if err != nil {
 			line.CloseLine()
@@ -54,6 +54,12 @@ func (line Line) SendToLine(byt []byte) (int, error) {
 }
 
 func (line Line) NewLine() {
+
+	_, ok := line.Tun.Lines[line.LineID]
+
+	if ok {
+		return
+	}
 
 	line.Tun.Lines[line.LineID] = &line
 
