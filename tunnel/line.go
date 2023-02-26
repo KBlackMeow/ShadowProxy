@@ -76,6 +76,8 @@ func (line Line) NewLine() {
 	line.Tun.Write(data)
 
 	go line.ListenFromLine()
+
+	logger.Log("TUN", "Tunnel ", line.Tun.TunnelID, "Line", line.LineID, "connected.")
 }
 
 func (line Line) CloseLine() {

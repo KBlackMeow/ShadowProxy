@@ -29,7 +29,7 @@ func (client TunnelClient) Run() {
 }
 
 func (client TunnelClient) CreateTCPTunnel() {
-	addr := "127.0.0.1:40000"
+	addr := "127.0.0.1:10001"
 	tun := Tunnel{
 		TunnelID:   uint32(cryptotools.EasyHash_uint64(addr)),
 		TunnelConn: client.ServiceListener,
