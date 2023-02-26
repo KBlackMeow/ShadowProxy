@@ -29,7 +29,7 @@ func (tun Tunnel) Write(data []byte) (int, error) {
 	return tun.TunnelConn.WriteToUDP(data, tun.TunnelAddr)
 }
 
-func (tun Tunnel) Send(pkg TunnelPackage) (int, error) {
+func (tun Tunnel) SendToReal(pkg TunnelPackage) (int, error) {
 	line := tun.Lines[pkg.LineID]
 	return line.WriteToLine(pkg.Bytes)
 }

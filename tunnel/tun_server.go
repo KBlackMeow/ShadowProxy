@@ -65,7 +65,7 @@ func (server TunnelServer) Run() {
 		if !ok {
 			continue
 		}
-		tun.Send(tunpak)
+		tun.SendToReal(tunpak)
 	}
 
 }
