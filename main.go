@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"time"
 
 	"shadowproxy/config"
 	"shadowproxy/proxy"
@@ -24,8 +23,8 @@ func ServerComponentInit() {
 	// filter.InitFilter()
 
 	tunnel.TunnelInit2()
-	time.Sleep(time.Second * 1)
-	tunnel.TunnelInit1()
+	// time.Sleep(time.Second * 1)
+	// tunnel.TunnelInit1()
 
 	proxy.RunProxy()
 

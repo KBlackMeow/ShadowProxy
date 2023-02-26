@@ -10,7 +10,7 @@ import (
 type TunnelClient struct {
 	ServiceAddr     string
 	ServiceListener *net.UDPConn
-	TargetAddr      string
+	TunnelAddr      string
 	Tunnels         map[uint32]*Tunnel
 }
 
@@ -33,7 +33,7 @@ func (client TunnelClient) Run() {
 
 func (client TunnelClient) CreateTCPTunnel() {
 	addr := "127.0.0.1:10001"
-	udpAddr, _ := net.ResolveUDPAddr("udp4", client.TargetAddr)
+	udpAddr, _ := net.ResolveUDPAddr("udp4", client.TunnelAddr)
 	tun := Tunnel{
 		TunnelID:   uint32(cryptotools.EasyHash_uint64(addr)),
 		TunnelConn: client.ServiceListener,
@@ -52,11 +52,11 @@ func (client TunnelClient) CreateTCPTunnel() {
 			logger.Error("TUN", err)
 			continue
 		}
-
+		logger.Log("TUN", "client read ", n1)
 		pkg := TunnelPackage{}
 		e1 := json.Unmarshal(buffer[:n1], &pkg)
 		if e1 != nil {
-			logger.Error(e1)
+			logger.Error("TUN", e1)
 			continue
 		}
 
@@ -83,6 +83,7 @@ func (client TunnelClient) CreateTCPTunnel() {
 		}
 
 		tun, ok := client.Tunnels[pkg.TunnelID]
+
 		if !ok {
 			continue
 		}
@@ -94,7 +95,7 @@ func (client TunnelClient) CreateTCPTunnel() {
 func TunnelInit1() {
 	tunnelClient := TunnelClient{
 		ServiceAddr: "127.0.0.1:65533",
-		TargetAddr:  "127.0.0.1:65534",
+		TunnelAddr:  "127.0.0.1:65534",
 		Tunnels:     map[uint32]*Tunnel{},
 	}
 

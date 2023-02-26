@@ -20,7 +20,6 @@ type TunnelPackage struct {
 type Tunnel struct {
 	TunnelID   uint32
 	TunnelAddr *net.UDPAddr
-	ListenConn net.Conn
 	TunnelConn *net.UDPConn
 	Lines      map[uint32]*Line
 	TargetAddr string
@@ -34,7 +33,8 @@ func (tun Tunnel) Write(data []byte) (int, error) {
 
 func (tun Tunnel) SendToReal(pkg TunnelPackage) (int, error) {
 	line := tun.Lines[pkg.LineID]
-	return line.WriteToLine(pkg.Bytes)
+	n1, err := line.SendToReal(pkg.Bytes)
+	return n1, err
 }
 
 func (tun Tunnel) CloseTun() {

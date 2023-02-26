@@ -36,22 +36,23 @@ func (server TunnelServer) Run() {
 			return
 		}
 
-		logger.Log("TUN", "read ", n1)
+		logger.Log("TUN", addr.String(), "->", server.ServiceAddr, n1, "Bytes")
 
 		tunpak := TunnelPackage{}
 
 		e1 := json.Unmarshal(buffer[0:n1], &tunpak)
+
 		if e1 != nil {
 			logger.Error("TUN", e1)
 			continue
 		}
 
 		if tunpak.NewTun == 1 {
-			server.CreateTCPTunnel(addr)
+			go server.CreateTCPTunnel(addr, tunpak.TunnelID)
 			continue
 		}
 		if tunpak.NewTun == 2 {
-			server.CreateUDPTunnel(addr)
+			go server.CreateUDPTunnel(addr, tunpak.TunnelID)
 			continue
 		}
 
@@ -59,12 +60,12 @@ func (server TunnelServer) Run() {
 		if !ok {
 			continue
 		}
-		tun.SendToReal(tunpak)
+		go tun.SendToReal(tunpak)
 	}
 
 }
 
-func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr) {
+func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr, tunid uint32) {
 
 	addr := "0.0.0.0:10002"
 	listener, err := net.Listen("tcp4", addr)
@@ -77,8 +78,7 @@ func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr) {
 	logger.Log("TUN", addr, "target server listening.")
 
 	tun := Tunnel{
-		ListenConn: server.ServiceListener,
-		TunnelID:   uint32(cryptotools.EasyHash_uint64(remoteAddr.String())),
+		TunnelID:   tunid,
 		TunnelAddr: remoteAddr,
 		TunnelConn: server.ServiceListener,
 		Lines:      map[uint32]*Line{},
@@ -104,7 +104,7 @@ func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr) {
 	}
 }
 
-func (server TunnelServer) CreateUDPTunnel(remoteAddr *net.UDPAddr) {
+func (server TunnelServer) CreateUDPTunnel(remoteAddr *net.UDPAddr, tunid uint32) {
 
 }
 

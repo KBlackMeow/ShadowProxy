@@ -14,19 +14,20 @@ type Line struct {
 
 func (line Line) ListenFromLine() {
 
-	buffer := make([]byte, 4096)
+	buffer := make([]byte, 2048)
 
 	for {
 		n1, err := line.Conn.Read(buffer)
 		if err != nil {
+			logger.Error(err)
 			line.CloseLine()
 			return
 		}
-
-		n2, err := line.Tun.Write(buffer[:n1])
+		n2, err := line.WriteToLine(buffer[:n1])
 		logger.Log("TUN", line.Conn.RemoteAddr().String(), "->", line.Tun.TunnelAddr.String(), n2, "Bytes")
 
 		if err != nil {
+			logger.Error(err)
 			line.CloseLine()
 			return
 		}
@@ -46,10 +47,11 @@ func (line Line) WriteToLine(byt []byte) (int, error) {
 	}
 
 	data, _ := json.Marshal(pkg)
+
 	return line.Tun.Write(data)
 }
 
-func (line Line) SendToLine(byt []byte) (int, error) {
+func (line Line) SendToReal(byt []byte) (int, error) {
 	return line.Conn.Write(byt)
 }
 
