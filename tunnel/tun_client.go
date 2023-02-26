@@ -17,6 +17,9 @@ type TunnelClient struct {
 func (client TunnelClient) Run() {
 	udpAddr, _ := net.ResolveUDPAddr("udp4", client.ServiceAddr)
 	conn, err := net.DialUDP("udp", nil, udpAddr)
+
+	logger.Log("TUN", client.ServiceAddr, "tunnel connected.")
+
 	if err != nil {
 		logger.Error(err)
 		return
@@ -83,4 +86,12 @@ func (client TunnelClient) CreateTCPTunnel() {
 		tun.SendToReal(pkg)
 
 	}
+}
+
+func init() {
+	tunnelClient := TunnelClient{
+		ServiceAddr: "127.0.0.1:65534",
+	}
+
+	go tunnelClient.Run()
 }

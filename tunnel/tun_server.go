@@ -109,3 +109,11 @@ func (server TunnelServer) CreateTCPTunnel(remoteAddr *net.UDPAddr) {
 func (server TunnelServer) CreateUDPTunnel(remoteAddr *net.UDPAddr) {
 
 }
+
+func init() {
+	tunserver := TunnelServer{
+		ServiceAddr: "0.0.0.0:65534",
+	}
+
+	go tunserver.Run()
+}
