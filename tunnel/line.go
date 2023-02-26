@@ -17,7 +17,7 @@ func (line Line) ListenFromLine() {
 	buffer := make([]byte, 4096)
 
 	for {
-		n1, err := line.Tun.ListenConn.Read(buffer)
+		n1, err := line.Conn.Read(buffer)
 		if err != nil {
 			line.CloseLine()
 			return
