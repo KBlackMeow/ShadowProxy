@@ -62,7 +62,18 @@ func (client TunnelClient) Run() {
 			}
 
 			line.NewLine()
+			continue
 		}
+
+		if pkg.NewLine == 2 {
+			continue
+		}
+
+		tun, ok := client.Tunnels[pkg.TunnelID]
+		if !ok {
+			continue
+		}
+		tun.Send(pkg)
 
 	}
 
