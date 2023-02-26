@@ -24,6 +24,8 @@ func (client TunnelClient) Run() {
 	client.ServiceListener = conn
 	defer client.ServiceListener.Close()
 
+	client.CreateTCPTunnel()
+
 }
 
 func (client TunnelClient) CreateTCPTunnel() {
