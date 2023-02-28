@@ -4,7 +4,10 @@ import (
 	"flag"
 
 	"shadowproxy/config"
+	"shadowproxy/filter"
 	"shadowproxy/proxy"
+	"shadowproxy/service"
+	"shadowproxy/shadowtools"
 )
 
 func init() {
@@ -17,10 +20,9 @@ func ClientComponentInit() {
 
 func ServerComponentInit() {
 
-	// service.InitServices()
-	// shadowtools.InitShadowService()
-	// filter.InitFilter()
-	proxy.RunRev()
+	service.InitServices()
+	shadowtools.InitShadowService()
+	filter.InitFilter()
 	proxy.RunProxy()
 
 }
