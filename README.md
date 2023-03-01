@@ -45,7 +45,7 @@ reverselinkserver: 127.0.0.1:50001
 
 # Rules of reverse proxy local -> remote
 reverserule: 
-- 192.168.2.197:7890->127.0.0.1:41000
+- 127.0.0.1:42000->127.0.0.1:41000
 
 # Those services will be run background. You can ban some service by delete it from array
 services:
