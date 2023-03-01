@@ -2,6 +2,7 @@ package client
 
 import (
 	"shadowproxy/config"
+	"shadowproxy/logger"
 	"shadowproxy/proxy"
 	"strings"
 )
@@ -15,7 +16,7 @@ func ReverseProxyClientRun() {
 
 	for _, v := range config.ShadowProxyConfig.ReverseRule {
 		addrs := strings.Split(v, "->")
-
+		logger.Log("REV CLI Start", v)
 		go client.Link(addrs[0], addrs[1])
 
 	}
