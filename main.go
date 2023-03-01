@@ -21,7 +21,7 @@ func ClientComponentInit() {
 func ServerComponentInit() {
 	service.InitServices()
 	shadowtools.InitShadowService()
-
+	proxy.RunRev()
 	filter.InitFilter()
 	proxy.RunProxy()
 

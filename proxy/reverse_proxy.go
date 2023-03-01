@@ -59,6 +59,7 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 			continue
 		}
 		if buff[0] == byte(255) {
+
 			addr, err := server.CreateBackendListener(conn, string(buff[1:n]))
 			if err != nil {
 				logger.Error("REV SER CON", err)
@@ -118,7 +119,7 @@ func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 		logger.Error("REV CLI", err)
 		return
 	}
-	buff := make([]byte, 3)
+	buff := make([]byte, 24)
 
 	buff[0] = byte(255)
 	copy(buff[1:], []byte(RemoteAddr))
@@ -127,10 +128,10 @@ func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 		logger.Error("REV CLI", err)
 		return
 	}
-	go client.Controller(conn)
+	go client.Controller(conn, LocalAddr)
 }
 
-func (client RevProxyClient) Controller(conn net.Conn) {
+func (client RevProxyClient) Controller(conn net.Conn, LocalAddr string) {
 	for {
 		buff := make([]byte, 4096)
 		n, err := conn.Read(buff)
@@ -139,7 +140,7 @@ func (client RevProxyClient) Controller(conn net.Conn) {
 			return
 		}
 		if buff[0] == byte(127) {
-			go client.Work()
+			go client.Work(LocalAddr)
 		} else {
 			logger.Log("REV CLI INFO", string(buff[:n]))
 		}
@@ -147,10 +148,9 @@ func (client RevProxyClient) Controller(conn net.Conn) {
 	}
 }
 
-func (client RevProxyClient) Work() {
-	realAddr := "127.0.0.1:50001"
+func (client RevProxyClient) Work(LocalAddr string) {
 
-	conn, err := net.Dial("tcp", realAddr)
+	conn, err := net.Dial("tcp", LocalAddr)
 	if err != nil {
 		return
 	}
