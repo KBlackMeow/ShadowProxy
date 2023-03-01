@@ -126,6 +126,10 @@ func (service AuthService2) Contraller() {
 
 func (service AuthService2) Run() {
 
+	if config.ShadowProxyConfig.AuthServer != "" {
+		service.serviceAddr = config.ShadowProxyConfig.AuthServer
+	}
+
 	logger.Log("Auth2 Service Addr", service.serviceAddr)
 	if config.ShadowProxyConfig.AuthSSL {
 		err := http.ListenAndServeTLS(service.serviceAddr, "server.crt", "server.key", nil)
@@ -155,7 +159,7 @@ func (service AuthService2) GetAddr() string {
 
 func init() {
 
-	service := AuthService2{Service{serviceName: "auth2", serviceAddr: "0.0.0.0:5555"}}
+	service := AuthService2{Service{serviceName: "auth2", serviceAddr: "127.0.0.1:50002"}}
 	service.Contraller()
 	ServiceAppend("auth2", service)
 

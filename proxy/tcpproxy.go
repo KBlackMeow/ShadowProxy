@@ -28,7 +28,7 @@ func (proxy TCPProxy) Run() {
 	}
 
 	defer listener.Close()
-	logger.Log("TCP", proxy.bindAddr, "tcp-proxy started.")
+	logger.Log("TCP", proxy.bindAddr, "->", proxy.backendAddr, "tcp-proxy started.")
 
 	for {
 		conn, err := listener.Accept()

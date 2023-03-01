@@ -1,15 +1,23 @@
 package client
 
 import (
+	"shadowproxy/config"
 	"shadowproxy/proxy"
+	"strings"
 )
 
 func ReverseProxyClientRun() {
 
 	client := proxy.RevProxyClient{
-		ServerAddr: "0.0.0.0:20000",
-		LinkAddr:   "0.0.0.0:20001",
+		ServerAddr: config.ShadowProxyConfig.ReverseServer,
+		LinkAddr:   config.ShadowProxyConfig.ReverseLinkServer,
 	}
-	// time.Sleep(time.Second * 1)
-	go client.Run()
+
+	for _, v := range config.ShadowProxyConfig.ReverseRule {
+		addrs := strings.Split(v, "->")
+
+		go client.Link(addrs[0], addrs[1])
+
+	}
+
 }

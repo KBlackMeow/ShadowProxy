@@ -105,6 +105,10 @@ func (service AuthService1) auth() {
 }
 
 func (service AuthService1) Run() {
+	if config.ShadowProxyConfig.AuthServer != "" {
+		service.serviceAddr = config.ShadowProxyConfig.AuthServer
+	}
+
 	logger.Log("Auth1 Service Addr", service.serviceAddr)
 	udpLAddr, _ := net.ResolveUDPAddr("udp4", service.serviceAddr)
 	listener, err := net.ListenUDP("udp4", udpLAddr)
@@ -131,8 +135,7 @@ func (service AuthService1) GetAddr() string {
 }
 
 func init() {
-
-	service := AuthService1{Service{serviceName: "auth1", serviceAddr: "0.0.0.0:5555"}, &net.UDPConn{}}
+	service := AuthService1{Service{serviceName: "auth1", serviceAddr: "127.0.0.1:50002"}, &net.UDPConn{}}
 	ServiceAppend("auth1", service)
 
 }

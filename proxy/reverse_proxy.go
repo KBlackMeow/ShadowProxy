@@ -2,7 +2,9 @@ package proxy
 
 import (
 	"net"
+	"shadowproxy/config"
 	"shadowproxy/logger"
+	"strings"
 	"time"
 )
 
@@ -49,15 +51,15 @@ func (server RevProxyServer) LinkController() {
 
 }
 func (server RevProxyServer) Controller(conn net.Conn) {
-	buff := make([]byte, 1)
+	buff := make([]byte, 24)
 	for {
 		n, err := conn.Read(buff)
 		if err != nil {
 			logger.Error("REV SER CON ", err)
 			continue
 		}
-		if buff[:n][0] == byte(255) {
-			addr, err := server.CreateBackendListener(conn)
+		if buff[0] == byte(255) {
+			addr, err := server.CreateBackendListener(conn, string(buff[1:n]))
 			if err != nil {
 				logger.Error("REV SER CON", err)
 				continue
@@ -71,9 +73,9 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 	}
 }
 
-func (server RevProxyServer) CreateBackendListener(conn net.Conn) (string, error) {
-	backend := "0.0.0.0:50000"
+func (server RevProxyServer) CreateBackendListener(conn net.Conn, backend string) (string, error) {
 
+	logger.Log("REV SER BACK listen", backend)
 	listener, err := net.Listen("tcp", backend)
 	if err != nil {
 		return "", err
@@ -110,15 +112,16 @@ type RevProxyClient struct {
 	LinkAddr   string
 }
 
-func (client RevProxyClient) Run() {
+func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 	conn, err := net.Dial("tcp", client.ServerAddr)
 	if err != nil {
 		logger.Error("REV CLI", err)
 		return
 	}
-	buff := make([]byte, 1)
-	buff[0] = byte(255)
+	buff := make([]byte, 3)
 
+	buff[0] = byte(255)
+	copy(buff[1:], []byte(RemoteAddr))
 	_, err = conn.Write(buff)
 	if err != nil {
 		logger.Error("REV CLI", err)
@@ -178,15 +181,20 @@ func connection(from net.Conn, to net.Conn) {
 
 func RunRev() {
 	server := RevProxyServer{
-		ServerAddr: "0.0.0.0:20000",
-		LinkAddr:   "0.0.0.0:20001",
+		ServerAddr: config.ShadowProxyConfig.ReverseServer,
+		LinkAddr:   config.ShadowProxyConfig.ReverseLinkServer,
 	}
 	go server.Run()
 
 	client := RevProxyClient{
-		ServerAddr: "0.0.0.0:20000",
-		LinkAddr:   "0.0.0.0:20001",
+		ServerAddr: config.ShadowProxyConfig.ReverseServer,
+		LinkAddr:   config.ShadowProxyConfig.ReverseLinkServer,
 	}
 	time.Sleep(time.Second * 1)
-	go client.Run()
+	for _, v := range config.ShadowProxyConfig.ReverseRule {
+		addrs := strings.Split(v, "->")
+
+		go client.Link(addrs[0], addrs[1])
+
+	}
 }
