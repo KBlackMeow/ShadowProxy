@@ -37,6 +37,16 @@ authserver: 127.0.0.1:5555
 # The shadow service will be visited if client ip is not in white list or in black list.
 shadow: 127.0.0.1:57575
 
+# Reverse proxy server address
+revserver: 127.0.0.1:50000
+
+# Reverse proxy server data link manager address
+reverselinkserver: 127.0.0.1:50001
+
+# Rules of reverse proxy local -> remote
+reverserule: 
+- 192.168.2.197:7890->127.0.0.1:41000
+
 # Those services will be run background. You can ban some service by delete it from array
 services:
 - auth # 127.0.0.1:57575
