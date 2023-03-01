@@ -35,9 +35,9 @@ func (service RevProxyService) GetName() string {
 }
 
 func init() {
-	service := RevProxyService{
-		Service{serviceName: "reverse", serviceAddr: "127.0.0.1:50000"},
-		proxy.RevProxyServer{ServerAddr: "127.0.0.1:50000", LinkAddr: "127.0.0.1:50001"},
-	}
-	ServiceAppend("reverse", service)
+	// service := RevProxyService{
+	// 	Service{serviceName: "reverse", serviceAddr: "127.0.0.1:50000"},
+	// 	proxy.RevProxyServer{ServerAddr: "127.0.0.1:50000", LinkAddr: "127.0.0.1:50001"},
+	// }
+	// ServiceAppend("reverse", service)
 }

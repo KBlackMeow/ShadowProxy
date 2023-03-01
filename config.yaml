@@ -10,7 +10,7 @@ authserver: 127.0.0.1:50002
 revserver: 127.0.0.1:50000
 reverselinkserver: 127.0.0.1:50001
 reverserule:
-- 127.0.0.1:41000->127.0.0.1:41001
+- 192.168.2.197:7890->127.0.0.1:41000
 services:
 - auth1
 - auth2
