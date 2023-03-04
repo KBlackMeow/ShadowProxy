@@ -23,7 +23,6 @@ func (proxy TCPProxy) Run() {
 
 	if err != nil {
 		logger.Error("TCP", err)
-		WG.Done()
 		return
 	}
 
@@ -34,7 +33,6 @@ func (proxy TCPProxy) Run() {
 		conn, err := listener.Accept()
 		if err != nil {
 			logger.Error("TCP", err)
-			WG.Done()
 			return
 		}
 		go ids.CheckIP(conn.RemoteAddr().String())

@@ -26,7 +26,6 @@ func (proxy UDProxy) Run() {
 
 	if err != nil {
 		logger.Error("UDP", err)
-		WG.Done()
 		return
 	}
 
@@ -44,7 +43,6 @@ func (proxy UDProxy) Forword() {
 
 		if err != nil {
 			logger.Error("UDP", err)
-			WG.Done()
 			return
 		}
 

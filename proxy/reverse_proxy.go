@@ -3,11 +3,8 @@ package proxy
 import (
 	"crypto/aes"
 	"net"
-	"shadowproxy/config"
 	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
-	"strings"
-	"time"
 )
 
 type RevProxyServer struct {
@@ -191,12 +188,10 @@ func (client RevProxyClient) Work(LocalAddr string) {
 // 			}
 
 // 			fmt.Println(n1)
-// 			buffer = cryptotools.Ase256Decode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456")
-
 // 			n := uint32(btoi(buffer[0:4]))
+// 			buffer = cryptotools.Ase256Decode(buffer[4:4+n], "12345678901234567890123456789012", "1234567890123456")
 // 			fmt.Println("SER RECV ", n)
-// 			buffer = buffer[4 : n+4]
-
+// 			buffer = buffer[0:n]
 // 			fmt.Println(1, "->", len(buffer), n)
 // 			_, err = to.Write(buffer)
 // 			if err != nil {
@@ -213,11 +208,11 @@ func (client RevProxyClient) Work(LocalAddr string) {
 
 // 			// TEST
 // 			send := make([]byte, 4096)
-// 			copy(send[0:4], itob(uint32(n1)))
+// 			buffer = cryptotools.Ase256Encode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+// 			copy(send[0:4], itob(uint32(len(buffer))))
 // 			copy(send[4:], buffer)
 // 			buffer = send
-// 			fmt.Println(len(buffer), n1)
-// 			buffer = cryptotools.Ase256Encode(buffer[:n1+4], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+
 // 			fmt.Println(0, "->", len(buffer), n1)
 
 // 			_, err = to.Write(buffer)
@@ -259,25 +254,5 @@ func connection(from net.Conn, to net.Conn, crypt int) {
 		if err != nil {
 			return
 		}
-	}
-}
-
-func RunRev() {
-	server := RevProxyServer{
-		ServerAddr: config.ShadowProxyConfig.ReverseServer,
-		LinkAddr:   config.ShadowProxyConfig.ReverseLinkServer,
-	}
-	go server.Run()
-
-	client := RevProxyClient{
-		ServerAddr: config.ShadowProxyConfig.ReverseServer,
-		LinkAddr:   config.ShadowProxyConfig.ReverseLinkServer,
-	}
-	time.Sleep(time.Second * 1)
-	for _, v := range config.ShadowProxyConfig.ReverseRule {
-		addrs := strings.Split(v, "->")
-
-		go client.Link(addrs[0], addrs[1])
-
 	}
 }

@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"sync"
+	"time"
 
+	"shadowproxy/client"
 	"shadowproxy/config"
 	"shadowproxy/filter"
 	"shadowproxy/proxy"
@@ -15,7 +18,8 @@ func init() {
 }
 
 func ClientComponentInit() {
-	// client.ClientInit()
+	client.ClientInit()
+
 }
 
 func ServerComponentInit() {
@@ -26,10 +30,16 @@ func ServerComponentInit() {
 
 }
 
+func TEST() {
+	// TEST
+	time.Sleep(time.Second * 1)
+	client.ReverseProxyClientRun()
+}
+
 func main() {
 	help := flag.Bool("help", false, "print usage")
 	cfg := flag.String("config", "", "use config file")
-
+	test := flag.Bool("test", false, "print usage")
 	flag.Parse()
 
 	if *help {
@@ -42,8 +52,16 @@ func main() {
 	}
 
 	if !config.ShadowProxyConfig.Client {
-		ServerComponentInit()
+		go ServerComponentInit()
 	} else {
-		ClientComponentInit()
+		go ClientComponentInit()
 	}
+
+	if *test {
+		TEST()
+	}
+
+	var WG sync.WaitGroup
+	WG.Add(1)
+	WG.Wait()
 }
