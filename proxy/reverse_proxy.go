@@ -1,8 +1,10 @@
 package proxy
 
 import (
+	"crypto/aes"
 	"net"
 	"shadowproxy/config"
+	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
 	"strings"
 	"time"
@@ -51,9 +53,11 @@ func (server RevProxyServer) LinkController() {
 
 }
 func (server RevProxyServer) Controller(conn net.Conn) {
-	buff := make([]byte, 24)
 	for {
+		buff := make([]byte, 32)
 		n, err := conn.Read(buff)
+		// TEST
+		buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", "1234567890123456")
 		if err != nil {
 			logger.Error("REV SER CON ", err)
 			continue
@@ -65,7 +69,10 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 				logger.Error("REV SER CON", err)
 				continue
 			}
-			_, err = conn.Write([]byte(addr))
+			// TEST
+			buff = cryptotools.Ase256Encode([]byte(addr), "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+			_, err = conn.Write(buff)
+			// _, err = conn.Write([]byte(addr))
 			if err != nil {
 				logger.Error("REV SER CON", err)
 				continue
@@ -94,8 +101,11 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) 
 			logger.Error("REV SER BACK", err)
 			continue
 		}
-		buff := make([]byte, 1)
+		buff := make([]byte, 16)
 		buff[0] = 127
+		// TEST
+		buff = cryptotools.Ase256Encode(buff, "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+
 		_, err = conn.Write(buff)
 		if err != nil {
 			logger.Error("REV SER BACK", err)
@@ -103,8 +113,8 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) 
 		}
 
 		linkConn := <-server.LinkConn
-		go connection(backConn, linkConn)
-		go connection(linkConn, backConn)
+		go connection(backConn, linkConn, 0)
+		go connection(linkConn, backConn, 1)
 	}
 }
 
@@ -119,10 +129,12 @@ func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 		logger.Error("REV CLI", err)
 		return
 	}
-	buff := make([]byte, 24)
+	buff := make([]byte, 32)
 
 	buff[0] = byte(255)
 	copy(buff[1:], []byte(RemoteAddr))
+	// TEST
+	buff = cryptotools.Ase256Encode(buff, "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
 	_, err = conn.Write(buff)
 	if err != nil {
 		logger.Error("REV CLI", err)
@@ -134,7 +146,11 @@ func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 func (client RevProxyClient) Controller(conn net.Conn, LocalAddr string) {
 	for {
 		buff := make([]byte, 4096)
+
 		n, err := conn.Read(buff)
+
+		// TEST
+		buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", "1234567890123456")
 		if err != nil {
 			logger.Error("REV CLI CON", err)
 			return
@@ -159,15 +175,82 @@ func (client RevProxyClient) Work(LocalAddr string) {
 	if err != nil {
 		return
 	}
-	go connection(conn, linkConn)
-	go connection(linkConn, conn)
+	go connection(conn, linkConn, 0)
+	go connection(linkConn, conn, 1)
 }
 
-func connection(from net.Conn, to net.Conn) {
+// func connection(from net.Conn, to net.Conn, crypt int) {
+// 	defer from.Close()
+// 	defer to.Close()
+// 	if crypt == 1 {
+// 		for {
+// 			buffer := make([]byte, 4096)
+// 			n1, err := from.Read(buffer)
+// 			if err != nil {
+// 				return
+// 			}
+
+// 			fmt.Println(n1)
+// 			buffer = cryptotools.Ase256Decode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456")
+
+// 			n := uint32(btoi(buffer[0:4]))
+// 			fmt.Println("SER RECV ", n)
+// 			buffer = buffer[4 : n+4]
+
+// 			fmt.Println(1, "->", len(buffer), n)
+// 			_, err = to.Write(buffer)
+// 			if err != nil {
+// 				return
+// 			}
+// 		}
+// 	} else if crypt == 0 {
+// 		for {
+// 			buffer := make([]byte, 4080)
+// 			n1, err := from.Read(buffer)
+// 			if err != nil {
+// 				return
+// 			}
+
+// 			// TEST
+// 			send := make([]byte, 4096)
+// 			copy(send[0:4], itob(uint32(n1)))
+// 			copy(send[4:], buffer)
+// 			buffer = send
+// 			fmt.Println(len(buffer), n1)
+// 			buffer = cryptotools.Ase256Encode(buffer[:n1+4], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+// 			fmt.Println(0, "->", len(buffer), n1)
+
+// 			_, err = to.Write(buffer)
+// 			if err != nil {
+// 				return
+// 			}
+// 		}
+// 	}
+
+// }
+
+// func itob(i uint32) []byte {
+// 	bt := make([]byte, 4)
+// 	bt[0] = byte(i & 0xff)
+// 	bt[1] = byte(i >> 8 & 0xff)
+// 	bt[2] = byte(i >> 16 & 0xff)
+// 	bt[3] = byte(i >> 24 & 0xff)
+// 	fmt.Println("itob", bt)
+// 	return bt
+// }
+
+// func btoi(bt []byte) uint32 {
+// 	ret := uint32(0)
+// 	fmt.Println("btoi", bt)
+// 	ret = ret + uint32(bt[0]) + uint32(bt[1])<<8 + uint32(bt[2])<<16 + uint32(bt[3])<<24
+// 	return ret
+// }
+
+func connection(from net.Conn, to net.Conn, crypt int) {
 	defer from.Close()
 	defer to.Close()
-	buffer := make([]byte, 4096)
 	for {
+		buffer := make([]byte, 4096)
 		n1, err := from.Read(buffer)
 		if err != nil {
 			return
