@@ -119,7 +119,7 @@ func (c Client) Login() {
 	}
 }
 
-func ClientInit() {
+func ClientRun() {
 
 	c := Client{Token: "", Pubkey: "", Password: config.ShadowProxyConfig.Password, Addr: config.ShadowProxyConfig.AuthServer}
 	c.Login()

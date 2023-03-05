@@ -32,7 +32,7 @@ func (proxy UDProxy) Run() {
 	defer listener.Close()
 	logger.Log("UDP", proxy.bindAddr, "->", proxy.backendAddr, "udp-proxy started.")
 	proxy.listener = listener
-	proxy.Forword()
+	go proxy.Forword()
 
 }
 func (proxy UDProxy) Forword() {

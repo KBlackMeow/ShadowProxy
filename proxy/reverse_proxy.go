@@ -245,13 +245,22 @@ func connection(from net.Conn, to net.Conn, crypt int) {
 	defer from.Close()
 	defer to.Close()
 	for {
-		buffer := make([]byte, 4096)
+		buffer := make([]byte, 4096*16)
 		n1, err := from.Read(buffer)
 		if err != nil {
+			logger.Error("REV", err)
+			from.Close()
+			to.Close()
 			return
 		}
+
+		logger.Log("REV", from.RemoteAddr().String(), "->", to.RemoteAddr().String(), n1, "Bytes")
+
 		_, err = to.Write(buffer[:n1])
 		if err != nil {
+			logger.Error("REV", err)
+			from.Close()
+			to.Close()
 			return
 		}
 	}

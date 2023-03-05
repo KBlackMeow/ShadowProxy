@@ -18,7 +18,7 @@ func init() {
 }
 
 func ClientComponentInit() {
-	client.ClientInit()
+	client.ClientRun()
 
 }
 
@@ -34,6 +34,7 @@ func TEST() {
 	// TEST
 	time.Sleep(time.Second * 1)
 	client.ReverseProxyClientRun()
+	client.ClientRun()
 }
 
 func main() {

@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"net"
-	"shadowproxy/connmanager"
 	"shadowproxy/filter"
 	"shadowproxy/ids"
 	"shadowproxy/logger"
@@ -68,7 +67,7 @@ func handler(conn net.Conn, backendAddr string) {
 	defer backend.Close()
 
 	transform.SetRemoteAddrToLocalAddr(backend.LocalAddr().String(), conn.RemoteAddr().String())
-	connmanager.AddConnToIP(backend, conn.RemoteAddr().String())
+	// connmanager.AddConnToIP(backend, conn.RemoteAddr().String())
 	logger.Log("TCP", backendAddr, "Bob connected.")
 
 	closed := make(chan bool, 2)
@@ -78,19 +77,21 @@ func handler(conn net.Conn, backendAddr string) {
 
 	transform.DeleteAddr(backend.LocalAddr().String())
 
-	connmanager.CloseConnFromIP(conn.RemoteAddr().String())
+	// connmanager.CloseConnFromIP(conn.RemoteAddr().String())
 	logger.Log("TCP", conn.RemoteAddr().String(), "Alice connection is closed.")
 
 }
 
 func proxy(from net.Conn, to net.Conn, closed chan bool, RTL bool) {
 
-	buffer := make([]byte, 4096)
+	buffer := make([]byte, 4096*16)
 
 	for {
 		n1, err := from.Read(buffer)
 		if err != nil {
 			closed <- true
+			from.Close()
+			to.Close()
 			return
 		}
 
@@ -103,6 +104,8 @@ func proxy(from net.Conn, to net.Conn, closed chan bool, RTL bool) {
 
 		if err != nil {
 			closed <- true
+			from.Close()
+			to.Close()
 			return
 		}
 	}
