@@ -1,7 +1,9 @@
 package proxy
 
 import (
+	"bytes"
 	"crypto/aes"
+	"encoding/binary"
 	"net"
 	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
@@ -176,70 +178,91 @@ func (client RevProxyClient) Work(LocalAddr string) {
 	go connection(linkConn, conn, 1)
 }
 
-// func connection(from net.Conn, to net.Conn, crypt int) {
-// 	defer from.Close()
-// 	defer to.Close()
-// 	if crypt == 1 {
-// 		for {
-// 			buffer := make([]byte, 4096)
-// 			n1, err := from.Read(buffer)
-// 			if err != nil {
-// 				return
-// 			}
+func connections(from net.Conn, to net.Conn, crypt int) {
+	defer from.Close()
+	defer to.Close()
+	if crypt == 1 {
+		for {
 
-// 			fmt.Println(n1)
-// 			n := uint32(btoi(buffer[0:4]))
-// 			buffer = cryptotools.Ase256Decode(buffer[4:4+n], "12345678901234567890123456789012", "1234567890123456")
-// 			fmt.Println("SER RECV ", n)
-// 			buffer = buffer[0:n]
-// 			fmt.Println(1, "->", len(buffer), n)
-// 			_, err = to.Write(buffer)
-// 			if err != nil {
-// 				return
-// 			}
-// 		}
-// 	} else if crypt == 0 {
-// 		for {
-// 			buffer := make([]byte, 4080)
-// 			n1, err := from.Read(buffer)
-// 			if err != nil {
-// 				return
-// 			}
+			buffer := make([]byte, 4)
+			_, err := from.Read(buffer)
+			if err != nil {
+				return
+			}
+			var n1 uint32
+			err = binary.Read(bytes.NewReader(buffer[:4]), binary.BigEndian, &n1)
+			if err != nil {
+				return
+			}
 
-// 			// TEST
-// 			send := make([]byte, 4096)
-// 			buffer = cryptotools.Ase256Encode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
-// 			copy(send[0:4], itob(uint32(len(buffer))))
-// 			copy(send[4:], buffer)
-// 			buffer = send
+			var n2 uint32
+			_, err = from.Read(buffer)
+			if err != nil {
+				return
+			}
 
-// 			fmt.Println(0, "->", len(buffer), n1)
+			err = binary.Read(bytes.NewReader(buffer[:4]), binary.BigEndian, &n2)
+			if err != nil {
+				return
+			}
 
-// 			_, err = to.Write(buffer)
-// 			if err != nil {
-// 				return
-// 			}
-// 		}
-// 	}
+			buffer = make([]byte, n2)
+			n, err := from.Read(buffer)
+			if err != nil {
+				return
+			}
 
-// }
+			var buff bytes.Buffer
+			buff.Write(buffer[:n])
+			for uint32(n) < n2 {
+				tbuf := make([]byte, n2-uint32(n))
+				tn, err := from.Read(tbuf)
+				if err != nil {
+					return
+				}
+				buff.Write(tbuf)
+				n += tn
+			}
 
-// func itob(i uint32) []byte {
-// 	bt := make([]byte, 4)
-// 	bt[0] = byte(i & 0xff)
-// 	bt[1] = byte(i >> 8 & 0xff)
-// 	bt[2] = byte(i >> 16 & 0xff)
-// 	bt[3] = byte(i >> 24 & 0xff)
-// 	fmt.Println("itob", bt)
-// 	return bt
-// }
+			buffer = cryptotools.Ase256Decode(buff.Bytes(), "12345678901234567890123456789012", "1234567890123456")
 
-// func btoi(bt []byte) uint32 {
-// 	ret := uint32(0)
-// 	fmt.Println("btoi", bt)
-// 	ret = ret + uint32(bt[0]) + uint32(bt[1])<<8 + uint32(bt[2])<<16 + uint32(bt[3])<<24
-// 	return ret
-// }
+			_, err = to.Write(buffer[:n1])
+			if err != nil {
+				return
+			}
+		}
+	} else if crypt == 0 {
+		for {
+			buffer := make([]byte, 4096)
+			n1, err := from.Read(buffer)
+			if err != nil {
+				return
+			}
+
+			var lengthBuf bytes.Buffer
+			err = binary.Write(&lengthBuf, binary.BigEndian, uint32(n1))
+			if err != nil {
+				return
+			}
+			to.Write(lengthBuf.Bytes())
+
+			buffer = cryptotools.Ase256Encode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+
+			lengthBuf.Reset()
+			err = binary.Write(&lengthBuf, binary.BigEndian, uint32(len(buffer)))
+			if err != nil {
+				return
+			}
+			to.Write(lengthBuf.Bytes())
+
+			_, err = to.Write(buffer)
+			if err != nil {
+				return
+			}
+		}
+	}
+
+}
 
 func connection(from net.Conn, to net.Conn, crypt int) {
 	defer from.Close()
