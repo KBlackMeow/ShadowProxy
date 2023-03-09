@@ -19,6 +19,7 @@ type Config struct {
 	AuthServer        string   `yaml:"authserver"`
 	ReverseServer     string   `yaml:"revserver"`
 	ReverseLinkServer string   `yaml:"reverselinkserver"`
+	ReverseCrypt      bool     `yaml:"reversecrypt"`
 	ReverseRule       []string `yaml:"reverserule"`
 	Services          []string `yaml:"services"`
 	Rules             []string `yaml:"rules"`
@@ -61,6 +62,7 @@ func GenEmptyConfig() {
 		ReverseServer:     "127.0.0.1:50000",
 		ReverseLinkServer: "127.0.0.1:50001",
 		ReverseRule:       []string{"127.0.0.1:41000->127.0.0.1:41001"},
+		ReverseCrypt:      true,
 		Services:          []string{"auth1", "auth2", "flag", "cmd", "reverse"},
 		Rules:             []string{"tcp://127.0.0.1:30000->127.0.0.1:40000"},
 		WhiteList:         []string{"127.0.0.1"},

@@ -9,6 +9,7 @@ shadows: 127.0.0.1:57575
 authserver: 127.0.0.1:50002
 revserver: 127.0.0.1:50000
 reverselinkserver: 127.0.0.1:50001
+reversecrypt: true
 reverserule:
 - 127.0.0.1:42000->127.0.0.1:41000
 # - 192.168.2.197:7890->127.0.0.1:41000

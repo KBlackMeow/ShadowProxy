@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"encoding/binary"
 	"net"
+	"shadowproxy/config"
 	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
 )
@@ -112,8 +113,15 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) 
 		}
 
 		linkConn := <-server.LinkConn
-		go connection(backConn, linkConn, 0)
-		go connection(linkConn, backConn, 1)
+
+		if config.ShadowProxyConfig.ReverseCrypt {
+			go connections(backConn, linkConn, 0)
+			go connections(linkConn, backConn, 1)
+		} else {
+			go connection(backConn, linkConn, 0)
+			go connection(linkConn, backConn, 1)
+		}
+
 	}
 }
 
@@ -174,8 +182,15 @@ func (client RevProxyClient) Work(LocalAddr string) {
 	if err != nil {
 		return
 	}
-	go connection(conn, linkConn, 0)
-	go connection(linkConn, conn, 1)
+
+	if config.ShadowProxyConfig.ReverseCrypt {
+		go connections(conn, linkConn, 0)
+		go connections(linkConn, conn, 1)
+	} else {
+		go connection(conn, linkConn, 0)
+		go connection(linkConn, conn, 1)
+	}
+
 }
 
 func connections(from net.Conn, to net.Conn, crypt int) {
