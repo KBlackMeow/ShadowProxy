@@ -162,7 +162,6 @@ func (client RevProxyClient) Controller(conn net.Conn, LocalAddr string) {
 
 		n, err := conn.Read(buff)
 
-		// TEST
 		buff = cryptotools.Ase256Decode(buff[:n], config.TempCfgObj.Key, "1234567890123456")
 		if err != nil {
 			logger.Error("REV CLI CON", err)
