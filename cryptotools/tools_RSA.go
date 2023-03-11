@@ -148,7 +148,8 @@ func RSA_DigitalSignatureVerify(msg []byte, sign []byte, path string) bool {
 	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA512, msghash[:], sign)
 
 	if err != nil {
-		return false
+		panic(err)
+		// return false
 	}
 	return true
 
