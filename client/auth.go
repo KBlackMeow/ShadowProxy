@@ -104,5 +104,6 @@ func (c Client) Login() {
 func ClientRun() {
 
 	c := Client{Token: "", Password: config.ShadowProxyConfig.Password, Addr: config.ShadowProxyConfig.AuthServer}
+	config.TempCfgObj.Key = cryptotools.Hash_MD5("4455667")
 	c.Login()
 }
