@@ -201,6 +201,34 @@ func DigitalSignatureVerify(msg string, sign string) bool {
 
 }
 
+func RSA_Encode(msg []byte, pubkey string) []byte {
+	block, _ := pem.Decode([]byte(pubkey))
+	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		panic(err)
+	}
+
+	publicKey := publicKeyInterface.(*rsa.PublicKey)
+	cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, []byte(msg))
+	if err != nil {
+		panic(err)
+	}
+	return cipherText
+}
+
+func RSA_Decode(cmsg []byte, prikey string) []byte {
+	block, _ := pem.Decode([]byte(prikey))
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		panic(err)
+	}
+
+	plainText, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, cmsg)
+	if err != nil {
+		panic(err)
+	}
+	return plainText
+}
 func init() {
 
 	GenerateRSAKey(2048)

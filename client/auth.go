@@ -22,7 +22,6 @@ type AuthMessage struct {
 type Client struct {
 	Addr     string
 	Token    string
-	Pubkey   string
 	Password string
 	Conn     net.Conn
 }
@@ -65,8 +64,8 @@ func (c *Client) Listen() {
 
 		if Message.Pubkey != "" {
 			c.Token = Message.Token
-			c.Pubkey = Message.Pubkey
-			logger.Log("Login : Get PubKey, length:", len(c.Pubkey))
+			config.TempCfgObj.PubKey = Message.Pubkey
+			logger.Log("Login : Get PubKey, length:", len(config.TempCfgObj.PubKey))
 		}
 
 	}
@@ -84,10 +83,10 @@ func (c Client) Login() {
 	go c.Listen()
 
 	for {
-		if c.Pubkey != "" {
+		if config.TempCfgObj.PubKey != "" {
 			Message := c.Password + "#" + fmt.Sprint(time.Now().UnixMilli()) + "#" + c.Token
 
-			block, _ := pem.Decode([]byte(c.Pubkey))
+			block, _ := pem.Decode([]byte(config.TempCfgObj.PubKey))
 			publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
 			if err != nil {
 				logger.Error(err)
@@ -121,6 +120,6 @@ func (c Client) Login() {
 
 func ClientRun() {
 
-	c := Client{Token: "", Pubkey: "", Password: config.ShadowProxyConfig.Password, Addr: config.ShadowProxyConfig.AuthServer}
+	c := Client{Token: "", Password: config.ShadowProxyConfig.Password, Addr: config.ShadowProxyConfig.AuthServer}
 	c.Login()
 }

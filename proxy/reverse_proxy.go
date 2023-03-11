@@ -19,12 +19,14 @@ type RevProxyServer struct {
 func (server RevProxyServer) Run() {
 	server.LinkConn = make(chan net.Conn, 2)
 	go server.LinkController()
+
 	listener, err := net.Listen("tcp", server.ServerAddr)
 	if err != nil {
 		logger.Error("REV SER", err)
 		return
 	}
 	defer listener.Close()
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -54,25 +56,28 @@ func (server RevProxyServer) LinkController() {
 }
 func (server RevProxyServer) Controller(conn net.Conn) {
 	for {
-		buff := make([]byte, 32)
+		buff := make([]byte, 4096)
 		n, err := conn.Read(buff)
 		// TEST
-		buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", "1234567890123456")
+		// buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", "1234567890123456")
+		logger.Log(conn.RemoteAddr().String(), n)
+		buff, key := cryptotools.RSA_AES_decode("", buff[:n])
+
 		if err != nil {
 			logger.Error("REV SER CON ", err)
 			continue
 		}
 		if buff[0] == byte(255) {
 
-			addr, err := server.CreateBackendListener(conn, string(buff[1:n]))
+			addr, err := server.CreateBackendListener(conn, string(buff[1:]), key)
 			if err != nil {
 				logger.Error("REV SER CON", err)
 				continue
 			}
 			// TEST
-			buff = cryptotools.Ase256Encode([]byte(addr), "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+			buff = cryptotools.Ase256Encode([]byte(addr), key, "1234567890123456", aes.BlockSize)
+
 			_, err = conn.Write(buff)
-			// _, err = conn.Write([]byte(addr))
 			if err != nil {
 				logger.Error("REV SER CON", err)
 				continue
@@ -81,19 +86,19 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 	}
 }
 
-func (server RevProxyServer) CreateBackendListener(conn net.Conn, backend string) (string, error) {
+func (server RevProxyServer) CreateBackendListener(conn net.Conn, backend string, key string) (string, error) {
 
 	logger.Log("REV SER BACK listen", backend)
 	listener, err := net.Listen("tcp", backend)
 	if err != nil {
 		return "", err
 	}
-	go server.BackendListen(listener, conn)
+	go server.BackendListen(listener, conn, key)
 	return backend, nil
 
 }
 
-func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) {
+func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn, key string) {
 	defer backend.Close()
 	for {
 		backConn, err := backend.Accept()
@@ -104,7 +109,7 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) 
 		buff := make([]byte, 16)
 		buff[0] = 127
 		// TEST
-		buff = cryptotools.Ase256Encode(buff, "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+		buff = cryptotools.Ase256Encode(buff, key, "1234567890123456", aes.BlockSize)
 
 		_, err = conn.Write(buff)
 		if err != nil {
@@ -115,8 +120,8 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) 
 		linkConn := <-server.LinkConn
 
 		if config.ShadowProxyConfig.ReverseCrypt {
-			go connections(backConn, linkConn, 0)
-			go connections(linkConn, backConn, 1)
+			go connections(backConn, linkConn, 0, key)
+			go connections(linkConn, backConn, 1, key)
 		} else {
 			go connection(backConn, linkConn)
 			go connection(linkConn, backConn)
@@ -128,6 +133,7 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) 
 type RevProxyClient struct {
 	ServerAddr string
 	LinkAddr   string
+	Key        string
 }
 
 func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
@@ -136,12 +142,12 @@ func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 		logger.Error("REV CLI", err)
 		return
 	}
-	buff := make([]byte, 32)
-
+	buff := make([]byte, 1024)
 	buff[0] = byte(255)
+
 	copy(buff[1:], []byte(RemoteAddr))
-	// TEST
-	buff = cryptotools.Ase256Encode(buff, "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+
+	buff = cryptotools.RSA_AES_encode(config.TempCfgObj.PubKey, config.TempCfgObj.Key, buff)
 	_, err = conn.Write(buff)
 	if err != nil {
 		logger.Error("REV CLI", err)
@@ -157,7 +163,7 @@ func (client RevProxyClient) Controller(conn net.Conn, LocalAddr string) {
 		n, err := conn.Read(buff)
 
 		// TEST
-		buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", "1234567890123456")
+		buff = cryptotools.Ase256Decode(buff[:n], config.TempCfgObj.Key, "1234567890123456")
 		if err != nil {
 			logger.Error("REV CLI CON", err)
 			return
@@ -184,8 +190,8 @@ func (client RevProxyClient) Work(LocalAddr string) {
 	}
 
 	if config.ShadowProxyConfig.ReverseCrypt {
-		go connections(conn, linkConn, 0)
-		go connections(linkConn, conn, 1)
+		go connections(conn, linkConn, 0, config.TempCfgObj.Key)
+		go connections(linkConn, conn, 1, config.TempCfgObj.Key)
 	} else {
 		go connection(conn, linkConn)
 		go connection(linkConn, conn)
@@ -193,7 +199,7 @@ func (client RevProxyClient) Work(LocalAddr string) {
 
 }
 
-func connections(from net.Conn, to net.Conn, tag int) {
+func connections(from net.Conn, to net.Conn, tag int, key string) {
 	defer from.Close()
 	defer to.Close()
 	if tag == 1 {
@@ -230,7 +236,7 @@ func connections(from net.Conn, to net.Conn, tag int) {
 				n += tn
 			}
 
-			buffer = cryptotools.Ase256Decode(buff.Bytes(), "12345678901234567890123456789012", "1234567890123456")
+			buffer = cryptotools.Ase256Decode(buff.Bytes(), key, "1234567890123456")
 			_, err = to.Write(buffer)
 			if err != nil {
 				return
@@ -244,7 +250,7 @@ func connections(from net.Conn, to net.Conn, tag int) {
 				return
 			}
 
-			buffer = cryptotools.Ase256Encode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
+			buffer = cryptotools.Ase256Encode(buffer[:n1], key, "1234567890123456", aes.BlockSize)
 
 			var lengthBuf bytes.Buffer
 			err = binary.Write(&lengthBuf, binary.BigEndian, uint32(len(buffer)))
