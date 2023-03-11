@@ -200,28 +200,19 @@ func connections(from net.Conn, to net.Conn, tag int) {
 		for {
 
 			buffer := make([]byte, 4)
+
+			var pkn uint32
 			_, err := from.Read(buffer)
 			if err != nil {
 				return
 			}
-			var n1 uint32
-			err = binary.Read(bytes.NewReader(buffer[:4]), binary.BigEndian, &n1)
+
+			err = binary.Read(bytes.NewReader(buffer[:4]), binary.BigEndian, &pkn)
 			if err != nil {
 				return
 			}
 
-			var n2 uint32
-			_, err = from.Read(buffer)
-			if err != nil {
-				return
-			}
-
-			err = binary.Read(bytes.NewReader(buffer[:4]), binary.BigEndian, &n2)
-			if err != nil {
-				return
-			}
-
-			buffer = make([]byte, n2)
+			buffer = make([]byte, pkn)
 			n, err := from.Read(buffer)
 			if err != nil {
 				return
@@ -229,8 +220,8 @@ func connections(from net.Conn, to net.Conn, tag int) {
 
 			var buff bytes.Buffer
 			buff.Write(buffer[:n])
-			for uint32(n) < n2 {
-				tbuf := make([]byte, n2-uint32(n))
+			for uint32(n) < pkn {
+				tbuf := make([]byte, pkn-uint32(n))
 				tn, err := from.Read(tbuf)
 				if err != nil {
 					return
@@ -240,8 +231,7 @@ func connections(from net.Conn, to net.Conn, tag int) {
 			}
 
 			buffer = cryptotools.Ase256Decode(buff.Bytes(), "12345678901234567890123456789012", "1234567890123456")
-
-			_, err = to.Write(buffer[:n1])
+			_, err = to.Write(buffer)
 			if err != nil {
 				return
 			}
@@ -255,11 +245,11 @@ func connections(from net.Conn, to net.Conn, tag int) {
 			}
 
 			var lengthBuf bytes.Buffer
-			err = binary.Write(&lengthBuf, binary.BigEndian, uint32(n1))
-			if err != nil {
-				return
-			}
-			to.Write(lengthBuf.Bytes())
+			// err = binary.Write(&lengthBuf, binary.BigEndian, uint32(n1))
+			// if err != nil {
+			// 	return
+			// }
+			// to.Write(lengthBuf.Bytes())
 
 			buffer = cryptotools.Ase256Encode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
 

@@ -67,7 +67,7 @@ func Ase256DecodeHex(cipherText string, encKey string, iv string) (decryptedStri
 }
 
 func PKCS5Padding(ciphertext []byte, blockSize int, after int) []byte {
-	padding := (blockSize - len(ciphertext)%blockSize)
+	padding := (blockSize - len(ciphertext)%blockSize) % blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(ciphertext, padtext...)
 }
