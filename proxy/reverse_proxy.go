@@ -58,9 +58,6 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 	for {
 		buff := make([]byte, 4096)
 		n, err := conn.Read(buff)
-		// TEST
-		// buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", config.TempCfgObj.AES_IV)
-		logger.Log(conn.RemoteAddr().String(), n)
 		buff, key := cryptotools.RSA_AES_decode("", config.TempCfgObj.AES_IV, buff[:n])
 
 		if err != nil {
@@ -74,7 +71,6 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 				logger.Error("REV SER CON", err)
 				continue
 			}
-			// TEST
 			buff = cryptotools.Ase256Encode([]byte(addr), key, config.TempCfgObj.AES_IV, aes.BlockSize)
 
 			_, err = conn.Write(buff)
@@ -201,6 +197,7 @@ func (client RevProxyClient) Work(LocalAddr string) {
 func connections(from net.Conn, to net.Conn, tag int, key string) {
 	defer from.Close()
 	defer to.Close()
+
 	if tag == 1 {
 		for {
 
