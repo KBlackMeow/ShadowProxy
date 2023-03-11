@@ -244,16 +244,9 @@ func connections(from net.Conn, to net.Conn, tag int) {
 				return
 			}
 
-			var lengthBuf bytes.Buffer
-			// err = binary.Write(&lengthBuf, binary.BigEndian, uint32(n1))
-			// if err != nil {
-			// 	return
-			// }
-			// to.Write(lengthBuf.Bytes())
-
 			buffer = cryptotools.Ase256Encode(buffer[:n1], "12345678901234567890123456789012", "1234567890123456", aes.BlockSize)
 
-			lengthBuf.Reset()
+			var lengthBuf bytes.Buffer
 			err = binary.Write(&lengthBuf, binary.BigEndian, uint32(len(buffer)))
 			if err != nil {
 				return
