@@ -57,7 +57,6 @@ func (proxy UDProxy) Forword() {
 			udpConn = link(proxy.listener, addr, proxy.backendAddr)
 		}
 
-		go ids.PackageLengthRecorder(addr.String(), n1)
 		n2, err := udpConn.BackendConn.Write(buffer[:n1])
 
 		if err != nil {

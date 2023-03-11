@@ -79,23 +79,3 @@ func CheckIP(addr string) {
 	}
 
 }
-
-func PackageLengthRecorder(addr string, length int) {
-
-	Mutex.Lock()
-	defer Mutex.Unlock()
-
-	addr = strings.Split(addr, ":")[0]
-
-	guest, ok := GuestMap[addr]
-	if !ok {
-		return
-	}
-
-	guest.sent(length)
-
-	if tem := len(guest.PackageLengthRecoder); tem > 100 {
-		guest.PackageLengthRecoder = guest.PackageLengthRecoder[tem-100:]
-	}
-
-}
