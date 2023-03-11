@@ -1,15 +1,12 @@
 package client
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"net"
 	"shadowproxy/config"
+	"shadowproxy/cryptotools"
 	"shadowproxy/logger"
 	"time"
 )
@@ -86,21 +83,7 @@ func (c Client) Login() {
 		if config.TempCfgObj.PubKey != "" {
 			Message := c.Password + "#" + fmt.Sprint(time.Now().UnixMilli()) + "#" + c.Token
 
-			block, _ := pem.Decode([]byte(config.TempCfgObj.PubKey))
-			publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
-			if err != nil {
-				logger.Error(err)
-				time.Sleep(time.Duration(3000) * time.Millisecond)
-				continue
-			}
-
-			publicKey := publicKeyInterface.(*rsa.PublicKey)
-			cipherText, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey, []byte(Message))
-			if err != nil {
-				logger.Error(err)
-				time.Sleep(time.Duration(3000) * time.Millisecond)
-				continue
-			}
+			cipherText := cryptotools.RSA_Encode([]byte(Message), config.TempCfgObj.PubKey)
 			cMessageb64 := base64.StdEncoding.EncodeToString(cipherText)
 
 			loginMessage := AuthMessage{}

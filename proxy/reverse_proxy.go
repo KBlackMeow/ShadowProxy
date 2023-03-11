@@ -59,9 +59,9 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 		buff := make([]byte, 4096)
 		n, err := conn.Read(buff)
 		// TEST
-		// buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", "1234567890123456")
+		// buff = cryptotools.Ase256Decode(buff[:n], "12345678901234567890123456789012", config.TempCfgObj.AES_IV)
 		logger.Log(conn.RemoteAddr().String(), n)
-		buff, key := cryptotools.RSA_AES_decode("", buff[:n])
+		buff, key := cryptotools.RSA_AES_decode("", config.TempCfgObj.AES_IV, buff[:n])
 
 		if err != nil {
 			logger.Error("REV SER CON ", err)
@@ -75,7 +75,7 @@ func (server RevProxyServer) Controller(conn net.Conn) {
 				continue
 			}
 			// TEST
-			buff = cryptotools.Ase256Encode([]byte(addr), key, "1234567890123456", aes.BlockSize)
+			buff = cryptotools.Ase256Encode([]byte(addr), key, config.TempCfgObj.AES_IV, aes.BlockSize)
 
 			_, err = conn.Write(buff)
 			if err != nil {
@@ -109,7 +109,7 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn, 
 		buff := make([]byte, 16)
 		buff[0] = 127
 		// TEST
-		buff = cryptotools.Ase256Encode(buff, key, "1234567890123456", aes.BlockSize)
+		buff = cryptotools.Ase256Encode(buff, key, config.TempCfgObj.AES_IV, aes.BlockSize)
 
 		_, err = conn.Write(buff)
 		if err != nil {
@@ -147,7 +147,7 @@ func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 
 	copy(buff[1:], []byte(RemoteAddr))
 
-	buff = cryptotools.RSA_AES_encode(config.TempCfgObj.PubKey, config.TempCfgObj.Key, buff)
+	buff = cryptotools.RSA_AES_encode(config.TempCfgObj.PubKey, config.TempCfgObj.Key, config.TempCfgObj.AES_IV, buff)
 	_, err = conn.Write(buff)
 	if err != nil {
 		logger.Error("REV CLI", err)
@@ -162,7 +162,7 @@ func (client RevProxyClient) Controller(conn net.Conn, LocalAddr string) {
 
 		n, err := conn.Read(buff)
 
-		buff = cryptotools.Ase256Decode(buff[:n], config.TempCfgObj.Key, "1234567890123456")
+		buff = cryptotools.Ase256Decode(buff[:n], config.TempCfgObj.Key, config.TempCfgObj.AES_IV)
 		if err != nil {
 			logger.Error("REV CLI CON", err)
 			return
@@ -235,7 +235,7 @@ func connections(from net.Conn, to net.Conn, tag int, key string) {
 				n += tn
 			}
 
-			buffer = cryptotools.Ase256Decode(buff.Bytes(), key, "1234567890123456")
+			buffer = cryptotools.Ase256Decode(buff.Bytes(), key, config.TempCfgObj.AES_IV)
 			_, err = to.Write(buffer)
 			if err != nil {
 				return
@@ -249,7 +249,7 @@ func connections(from net.Conn, to net.Conn, tag int, key string) {
 				return
 			}
 
-			buffer = cryptotools.Ase256Encode(buffer[:n1], key, "1234567890123456", aes.BlockSize)
+			buffer = cryptotools.Ase256Encode(buffer[:n1], key, config.TempCfgObj.AES_IV, aes.BlockSize)
 
 			var lengthBuf bytes.Buffer
 			err = binary.Write(&lengthBuf, binary.BigEndian, uint32(len(buffer)))
