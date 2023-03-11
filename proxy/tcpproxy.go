@@ -71,8 +71,8 @@ func handler(conn net.Conn, backendAddr string) {
 	logger.Log("TCP", backendAddr, "Bob connected.")
 
 	closed := make(chan bool, 2)
-	go proxy(conn, backend, closed, true)
-	go proxy(backend, conn, closed, false)
+	go proxy(conn, backend, closed)
+	go proxy(backend, conn, closed)
 	<-closed
 
 	transform.DeleteAddr(backend.LocalAddr().String())
@@ -82,7 +82,7 @@ func handler(conn net.Conn, backendAddr string) {
 
 }
 
-func proxy(from net.Conn, to net.Conn, closed chan bool, RTL bool) {
+func proxy(from net.Conn, to net.Conn, closed chan bool) {
 
 	buffer := make([]byte, 4096*16)
 
@@ -93,10 +93,6 @@ func proxy(from net.Conn, to net.Conn, closed chan bool, RTL bool) {
 			from.Close()
 			to.Close()
 			return
-		}
-
-		if RTL {
-			go ids.PackageLengthRecorder(from.RemoteAddr().String(), n1)
 		}
 
 		n2, err := to.Write(buffer[:n1])
