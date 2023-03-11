@@ -118,8 +118,8 @@ func (server RevProxyServer) BackendListen(backend net.Listener, conn net.Conn) 
 			go connections(backConn, linkConn, 0)
 			go connections(linkConn, backConn, 1)
 		} else {
-			go connection(backConn, linkConn, 0)
-			go connection(linkConn, backConn, 1)
+			go connection(backConn, linkConn)
+			go connection(linkConn, backConn)
 		}
 
 	}
@@ -187,16 +187,16 @@ func (client RevProxyClient) Work(LocalAddr string) {
 		go connections(conn, linkConn, 0)
 		go connections(linkConn, conn, 1)
 	} else {
-		go connection(conn, linkConn, 0)
-		go connection(linkConn, conn, 1)
+		go connection(conn, linkConn)
+		go connection(linkConn, conn)
 	}
 
 }
 
-func connections(from net.Conn, to net.Conn, crypt int) {
+func connections(from net.Conn, to net.Conn, tag int) {
 	defer from.Close()
 	defer to.Close()
-	if crypt == 1 {
+	if tag == 1 {
 		for {
 
 			buffer := make([]byte, 4)
@@ -246,7 +246,7 @@ func connections(from net.Conn, to net.Conn, crypt int) {
 				return
 			}
 		}
-	} else if crypt == 0 {
+	} else if tag == 0 {
 		for {
 			buffer := make([]byte, 4096)
 			n1, err := from.Read(buffer)
@@ -279,7 +279,7 @@ func connections(from net.Conn, to net.Conn, crypt int) {
 
 }
 
-func connection(from net.Conn, to net.Conn, crypt int) {
+func connection(from net.Conn, to net.Conn) {
 	defer from.Close()
 	defer to.Close()
 	for {
