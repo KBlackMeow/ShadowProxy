@@ -142,7 +142,7 @@ func (client RevProxyClient) Link(LocalAddr string, RemoteAddr string) {
 	buff[0] = byte(255)
 
 	copy(buff[1:], []byte(RemoteAddr))
-
+	// pubkey 是否可写为空字符串
 	buff = cryptotools.RSA_AES_encode(config.TempCfgObj.PubKey, config.TempCfgObj.Key, config.TempCfgObj.AES_IV, buff)
 	_, err = conn.Write(buff)
 	if err != nil {
